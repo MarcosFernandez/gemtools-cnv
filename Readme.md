@@ -54,8 +54,8 @@ i3 bundle. Otherwise use core2.
 
 The latest release can be downloaded here:
 
-* [GEM-Tools-cnv static binary bundle 1.7.1.0.0 for i3](http://statgen.cnag.cat/gemtools/releases/GEMTools-static-i3-1.7.1.0.0.tar.gz)
-* [GEM-Tools-cnv static binary bundle 1.7.1.0.0 for core2](http://statgen.cnag.cat/gemtools/releases/GEMTools-static-core2-1.7.1.0.0.tar.gz)
+* [GEM-Tools-cnv static binary bundle 1.7.1.0.0 for i3](http://statgen.cnag.cat/gemtools/releases/GEMTools-cnv-static-i3-1.7.1.0.0.tar.gz)
+* [GEM-Tools-cnv static binary bundle 1.7.1.0.0 for core2](http://statgen.cnag.cat/gemtools/releases/GEMTools-cnv-static-core2-1.7.1.0.0.tar.gz)
 
 Library distribution
 --------------------
