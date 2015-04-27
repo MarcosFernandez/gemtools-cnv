@@ -1,0 +1,54 @@
+About galculator:
+-----------------------------------------------------
+This tool counts nucleotide frequencies in fasta-files. Including:
+- Mono-nucleotide frequencies
+- Di-nucleotide frequencies
+- Gap di-nucleotide frequencies (XnY)
+
+Performance:
+-----------------------------------------------------
+Galculator traverses files linearly without storing larger parts
+in memory. Thus, the required memory is negectable no matter
+how large the file is. Speed mainly depends on the hard disk's
+data transfer rate which is currently about 70-100 MB/s.
+
+Requirements:
+-----------------------------------------------------
+- Recommended: gcc/g++ 4.3 or higher
+  use "make simple" if you have an older version
+  or problems while compiling
+		
+How to install:
+-----------------------------------------------------
+make		(if make fails, try "make simple")
+make install	(optional, requires root-privileges)
+
+How to use:
+-----------------------------------------------------
+galculator FASTA-FILE
+
+Output:
+-----------------------------------------------------
+One line with space separated results containing
+#sequences #nucleotides | A #NucleotideA C #NucleotideC ... AA #AA ... AnA #AnA
+
+Example output:
+84 3101804740 | A 845903867 C 585709826 G 586026532 T 847144996 N 237019519 AA 280042704 AC 144214828 AG 200305766 AT 221340541 CA 207810290 CC 149236512 CG 28245211 CT 200417617 GA 169975490 GC 122200725 GG 149305393 GT 144544873 TA 188075325 TC 170057716 TG 208169965 TT 280841927 AnA 289900282 AnC 153236360 AnG 167747667 AnT 235019500 CnA 150187330 CnC 135678786 CnG 131905482 CnT 167937999 GnA 174424530 GnC 122277612 GnG 135819904 GnT 153504412 TnA 231391451 TnC 174517002 TnG 150553253 TnT 290683022 
+
+Notes:
+-----------------------------------------------------
+galculator makes no difference between lower-case and upper-case letters.
+It accepts A, C, G, T, U and N, where Us are converted to Ts. Characters
+apart from this are treated as N. A warning will be displayed in this case.
+
+The tool is capable to handle up to 18,446,744,073,709,551,615 nucleotides
+per file (far beyond 1,000 Petabytes).
+
+You may run multiple instances of galculator in parallel. However,
+have the I/O-load in mind. An average hard disk will slow down considerably
+if too many galculator instances try to read data concurrently.
+
+Authors:
+-----------------------------------------------------
+Peter F. Stadler - studla@bioinf.uni-leipzig.de
+Marcus Lechner - lechner@pharamzie.uni-marburg.de
