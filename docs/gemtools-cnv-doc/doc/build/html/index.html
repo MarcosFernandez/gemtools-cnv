@@ -1,0 +1,528 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GEMTOOLS CNV PIPELINE Quickstart &mdash; GEMTOOLS CNV PIPELINE 1.6.0.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GEMTOOLS CNV PIPELINE 1.6.0.0 documentation" href="#"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="#" class="fa fa-home"> GEMTOOLS CNV PIPELINE</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">GEMTOOLS CNV PIPELINE  Quickstart</a><ul>
+<li><a class="reference internal" href="#download-and-install-the-gemtools-cnv">1) Download and install the gemtools-cnv</a></li>
+<li><a class="reference internal" href="#mask-the-genome">2) Mask the genome</a><ul>
+<li><a class="reference internal" href="#outputs">2.1) Outputs</a></li>
+<li><a class="reference internal" href="#create-configuration-reference-file">2.2) Create configuration reference file</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#run-the-pieline">3) Run the pieline</a></li>
+<li><a class="reference internal" href="#pipeline-outputs">4) Pipeline outputs</a><ul>
+<li><a class="reference internal" href="#copy-number-results">4.1) Copy Number Results</a></li>
+<li><a class="reference internal" href="#pipeline-html-report">4.2) Pipeline HTML report</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#important-notes">5) Important Notes</a><ul>
+<li><a class="reference internal" href="#samtools">5.1) SAMTOOLS</a></li>
+<li><a class="reference internal" href="#bwa">5.2) BWA</a></li>
+<li><a class="reference internal" href="#picard-tools">5.2) PICARD TOOLS</a></li>
+<li><a class="reference internal" href="#r-package">5.3) R Package</a></li>
+<li><a class="reference internal" href="#bedtools">5.4) BEDTOOLS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">GEMTOOLS CNV PIPELINE</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>GEMTOOLS CNV PIPELINE  Quickstart</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="gemtools-cnv-pipeline-quickstart">
+<h1>GEMTOOLS CNV PIPELINE  Quickstart<a class="headerlink" href="#gemtools-cnv-pipeline-quickstart" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="download-and-install-the-gemtools-cnv">
+<h2>1) Download and install the gemtools-cnv<a class="headerlink" href="#download-and-install-the-gemtools-cnv" title="Permalink to this headline">¶</a></h2>
+<p>If that goes well, you will have a <tt class="docutils literal"><span class="pre">gemtools-cnv</span></tt> command line tool available.
+Please check the <a class="reference external" href="https://github.com/MarcosFernandez/gemtols-cnv">GEMTools-CNV homepage</a> for download
+and installation instructions.</p>
+</div>
+<div class="section" id="mask-the-genome">
+<h2>2) Mask the genome<a class="headerlink" href="#mask-the-genome" title="Permalink to this headline">¶</a></h2>
+<p>In order to run cnv-pipeline the assembly reference must be prepared to
+perform in a right way all the cnv pipeline steps.</p>
+<p>The fasta reference must be masked on those regions known to be simple repeats
+(From <a class="reference external" href="http://en.wikipedia.org/wiki/Tandem_repeat">Tandem Repeat Finder</a>),
+repeats detected by  (From <a class="reference external" href="http://en.wikipedia.org/wiki/Interspersed_repeat">Repeat Masker</a>) and gaps.</p>
+<p>Additionaly, the reference genome is fragmented in kmer windows and mapped against itself to
+find overrepresented kmer windows that are going to be also masked. These masked regions are not interesting for the CNV study, its masking avoids bias
+caused by small repeats sequences.</p>
+<p>To compute read depth, the reference used is also masked 36 bps around any gap or repeat. The rationale behind this
+is to avoid deflation of read coverage around repeats or gaps where less reads would have been able to map. Once the pipeline is finished, the kmer masked
+reference is indexed with gem, and the padded reference must be processed by mrcanavar preparation step to perform the cnv calling.:</p>
+<div class="highlight-python"><pre>gemtools-cnv cnv-assembly-preparation -f my_fasta_file.fa -t 8 --bed-regions reference_repeats.bed reference_gaps.bed --chr-len chroms.size -kmer-mappings-threshold 20</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<div class="last line-block">
+<div class="line">All bed files (repeats and gaps) must be without header.</div>
+<div class="line">The fasta file reference must be raw, without any type of hard masking.</div>
+</div>
+</div>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last"><em>chroms.size</em> File must have two fields separated by tabulator. First one, chromosome name and second one, chromsome length.</p>
+</div>
+<div class="section" id="outputs">
+<h3>2.1) Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p><tt class="docutils literal"><span class="pre">gemtools-cnv</span> <span class="pre">cnv-assembly-preparation</span></tt> creates a set of folders with statistical results, plots, html documentation and output files.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="31%" />
+<col width="69%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Folder</th>
+<th class="head">Contents</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>mask-fasta</td>
+<td>Fasta masked files to be used in the mapping step.</td>
+</tr>
+<tr class="row-odd"><td>padded-fasta</td>
+<td>Reference to be used by cnv calling step. This fasta
+must be prepared according to 2.2 step.</td>
+</tr>
+<tr class="row-even"><td>html-report</td>
+<td>HTML document with Pipeline stats and plots.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="section" id="create-configuration-reference-file">
+<h3>2.2) Create configuration reference file<a class="headerlink" href="#create-configuration-reference-file" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Run this command only once for a new reference genome assembly (or versions of it with different repeat masking or different window sizes).</p>
+<p>In this step, reference genome file (FASTA format) is processed calculating the coordinates and GC content of three window classes (LW, SW, and CW)
+and saves this information in a &#8220;configuration&#8221; file.</p>
+<div class="highlight-python"><pre>gemtools-cnv cnv-prep -f padded-fasta-reference.fa -g reference_gaps.bed</pre>
+</div>
+<p><strong>Output</strong>: A file will be generated with <em>.conf</em> extension.</p>
+<p>Windows created:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="31%" />
+<col width="69%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type of Window</th>
+<th class="head">Definition</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>LW. Long Windows</td>
+<td>5.000 bp of non-masked characters. 1.000 bp slide of
+any character.</td>
+</tr>
+<tr class="row-odd"><td>SW. Short Windows</td>
+<td>1.000 bp of non-masked characters. 1.000 bp slide of
+any character.</td>
+</tr>
+<tr class="row-even"><td>CW. Copy Windows</td>
+<td>1.000 bp of non-masked characters.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="run-the-pieline">
+<h2>3) Run the pieline<a class="headerlink" href="#run-the-pieline" title="Permalink to this headline">¶</a></h2>
+<p>There are two types of pipelines to get copy number calls.</p>
+<blockquote>
+<div><p>The <strong>fast one</strong> (Fast pipeline) performs a mapping using <a class="reference external" href="http://algorithms.cnag.cat/wiki/The_GEM_library">gem mapper</a> and finally a copy number calling using <a class="reference external" href="http://mrcanavar.sourceforge.net/">mrCaNaVaR</a>.</p>
+<p><a class="reference internal" href="fast_pipeline.html"><em>3.1) Fast CNV Pipeline</em></a></p>
+<p>The <strong>long one</strong> needs much more computational time because it looks for PCR Duplicates. Firstly, it runs <a class="reference external" href="http://bio-bwa.sourceforge.net/bwa.shtml">bwa mem</a> with default parameters to apply
+<a class="reference external" href="http://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates">MarkDuplicates</a> in order to detect PCR artifacts. The BAM alignment file is tranformed to a FASTQ file to run the <a class="reference external" href="http://algorithms.cnag.cat/wiki/The_GEM_library">gem mapper</a> and call copy number regions
+using <a class="reference external" href="http://mrcanavar.sourceforge.net/">mrCaNaVaR</a>.</p>
+<p><a class="reference internal" href="long_pipeline.html"><em>3.2) Long CNV Pipeline</em></a></p>
+</div></blockquote>
+</div>
+<div class="section" id="pipeline-outputs">
+<h2>4) Pipeline outputs<a class="headerlink" href="#pipeline-outputs" title="Permalink to this headline">¶</a></h2>
+<p>The differents steps performed by the pipeline outputs a collection of results sorted in a set of folders. A description of the contents per each folder is done in the next table:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="41%" />
+<col width="11%" />
+<col width="11%" />
+<col width="18%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Folder</th>
+<th class="head">Contents</th>
+<th class="head">Fast Pipeline</th>
+<th class="head">Long Pipeline</th>
+<th class="head">Temporal
+Removed once finished</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>base-mapping</td>
+<td>bwa alignment file (bam format)</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>base-mapping-report</td>
+<td>HTML web document with mapping statistics</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>rm-dups</td>
+<td>Remove Duplicates (bam format) file</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>rm-dups-report</td>
+<td>HTML web document Duplicates statistics</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>bam-fastq</td>
+<td>Fastq files after BAM conversion</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="row-odd"><td>fragment-reads</td>
+<td>Fastq files divided in chunks</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="row-even"><td>split-reads</td>
+<td>Raw reads divided in chunks</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="row-odd"><td>chop-reads</td>
+<td>36 bp Chunks of Fastq reads</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>cnv-map</td>
+<td>Mappings in GEM format (MAP)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="row-odd"><td>map-sam</td>
+<td>Mappings in SAM format</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>map-stats</td>
+<td>JSON mapping stats files</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>mrcanavar</td>
+<td>Copy number outputs</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>cn-distribution</td>
+<td>Copy number distribution plots</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>html-doc</td>
+<td>Pipeline documentation in HTML web format</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition hint">
+<p class="first admonition-title">Hint</p>
+<p class="last">If you are just interested on copy number results and HTML documentations then you could remove mapping and chopping files in order to save
+disk space.</p>
+</div>
+<div class="section" id="copy-number-results">
+<h3>4.1) Copy Number Results<a class="headerlink" href="#copy-number-results" title="Permalink to this headline">¶</a></h3>
+<p>In folder <tt class="docutils literal"><span class="pre">mrcanavar</span></tt> are located the copy number calls. The files generated are:</p>
+<p><strong>CNV CALLS</strong></p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="44%" />
+<col width="56%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">File</th>
+<th class="head">Contents</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>mysample_mrcanavar.calls.copynumber.bed</td>
+<td>Main pipeline file result. Copy Number for non
+overlapping windows (Copy windows)</td>
+</tr>
+<tr class="row-odd"><td>mysample_mrcanavar.calls.cw_norm.bed</td>
+<td>Read Depth normalized by GC Content and control
+windows notification for copy windows</td>
+</tr>
+<tr class="row-even"><td>mysample_mrcanavar.calls.sw_norm.bed</td>
+<td>Read Depth normalized by GC Content and control
+windows notification for short windows</td>
+</tr>
+<tr class="row-odd"><td>mysample_mrcanavar.calls.lw_norm.bed</td>
+<td>Read Depth normalized by GC Content and control
+windows notification for long windows</td>
+</tr>
+<tr class="row-even"><td>mysample_mrcanavar.calls.log</td>
+<td>Brief description about read depth average and
+standard deviation of copy, short and long windows</td>
+</tr>
+<tr class="row-odd"><td>mysample_mrcanavar.calls</td>
+<td>Pipeline general information</td>
+</tr>
+</tbody>
+</table>
+<p><strong>READ DEPTH</strong></p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="43%" />
+<col width="57%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">File</th>
+<th class="head">Contents</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>mysample_mrcanavar.depth.cw_norm.bed</td>
+<td>Read Depth Normalized by GC Content for copy windows</td>
+</tr>
+<tr class="row-odd"><td>mysample_mrcanavar.depth.sw_norm.bed</td>
+<td>Read Depth Normalized by GC Content for short windows</td>
+</tr>
+<tr class="row-even"><td>mysample_mrcanavar.depth.lw_norm.bed</td>
+<td>Read Depth Normalized by GC Content for long windows</td>
+</tr>
+<tr class="row-odd"><td>mysample_mrcanavar.depth.cw.txt</td>
+<td>Raw Read Depth for copy windows</td>
+</tr>
+<tr class="row-even"><td>mysample_mrcanavar.depth.sw.txt</td>
+<td>Raw Read Depth for short windows</td>
+</tr>
+<tr class="row-odd"><td>mysample_mrcanavar.depth.lw.txt</td>
+<td>Raw Read Depth for long windows</td>
+</tr>
+<tr class="row-even"><td>mysample_mrcanavar.depth</td>
+<td>Raw Read Depth binary file</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="pipeline-html-report">
+<h3>4.2) Pipeline HTML report<a class="headerlink" href="#pipeline-html-report" title="Permalink to this headline">¶</a></h3>
+<p>Located in <tt class="docutils literal"><span class="pre">html-doc</span></tt> are found two document files, <strong>html</strong> web document and <strong>json</strong> text document. These files contains statistical values and plots of each pipeline step. Plot images are <tt class="docutils literal"><span class="pre">png</span></tt> files located in <tt class="docutils literal"><span class="pre">cn-distribution</span></tt>. <strong>HTML</strong> web document have references to images located in <tt class="docutils literal"><span class="pre">cn-distribution</span></tt> folder.</p>
+<p><strong>Long Pipeline outputs:</strong></p>
+<blockquote>
+<div><dl class="glossary docutils">
+<dt id="term-base-mapping-report">base-mapping-report</dt>
+<dd>Mapping statistics after <strong>bwa mem</strong> mapping.</dd>
+<dt id="term-rm-dups-report">rm-dups-report</dt>
+<dd>Remove duplicates statistics after performing <strong>MarkDuplicates</strong> from <a class="reference external" href="http://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates">MarkDuplicates</a></dd>
+</dl>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="important-notes">
+<h2>5) Important Notes<a class="headerlink" href="#important-notes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="samtools">
+<h3>5.1) SAMTOOLS<a class="headerlink" href="#samtools" title="Permalink to this headline">¶</a></h3>
+<p>The pipeline expects to find samtools installed on the system. Try to get the latest samtools from their github repository
+(<a class="reference external" href="https://github.com/samtools/samtools">https://github.com/samtools/samtools</a> – clone or download and call make to build it).</p>
+<p>The latest version is multi-threaded (i.e. samtools view &#8211;help will show a -&#64; paramter).</p>
+<p>Also, see if you have pigz installed in the system you try to run gemtools on. pigz is a parallel compressor and the pipeline makes use
+of it if it is available. It will speed up compression steps a lot!</p>
+</div>
+<div class="section" id="bwa">
+<h3>5.2) BWA<a class="headerlink" href="#bwa" title="Permalink to this headline">¶</a></h3>
+<p>The pipeline also expects to find bwa mapper installed on the system. Try to get the latest samtools from their github repository
+(<a class="reference external" href="https://github.com/lh3/bwa">https://github.com/lh3/bwa</a> – clone or download and call make to build it).</p>
+</div>
+<div class="section" id="picard-tools">
+<h3>5.2) PICARD TOOLS<a class="headerlink" href="#picard-tools" title="Permalink to this headline">¶</a></h3>
+<p>The pipeline uses picard tools when performing the <strong>long version</strong>. Download the package from (<a class="reference external" href="https://github.com/broadinstitute/picard">https://github.com/broadinstitute/picard</a>) or
+follow <a class="reference external" href="http://broadinstitute.github.io/picard/">http://broadinstitute.github.io/picard/</a> instructions.</p>
+</div>
+<div class="section" id="r-package">
+<h3>5.3) R Package<a class="headerlink" href="#r-package" title="Permalink to this headline">¶</a></h3>
+<p>R package must be installed in your system. Get last version from <a class="reference external" href="http://www.r-project.org/">http://www.r-project.org/</a> .</p>
+</div>
+<div class="section" id="bedtools">
+<h3>5.4) BEDTOOLS<a class="headerlink" href="#bedtools" title="Permalink to this headline">¶</a></h3>
+<p>The pipeline uses BEDTOOLS package to perform some of the steps. Get last version from <a class="reference external" href="https://code.google.com/p/bedtools/">https://code.google.com/p/bedtools/</a> and follow install instructions.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Marcos Fernandez-Callejo, Santiago Marco-Sola, Thasso Griebel.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'',
+            VERSION:'1.6.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

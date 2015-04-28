@@ -22,7 +22,7 @@ CNV GEMTOOLS PIPELINE
 
 Set of tools to perform all the pipeline. 
 
-    `cnv gemtools pipeline`_), 
+    `cnv gemtools pipeline`_ 
 
 .. _cnv gemtools pipeline: ../../../doc/build/html/index.html
 
@@ -32,7 +32,7 @@ JIP GEM CNV PIPELINE
 
 Use JIP pipeline system to run all the pipeline in three commands. (1. Assembly, 2. Pipeline Configuration, 3. Pipeline execution). 
 
-    `jip cnv gemtools pipeline`_), 
+    `jip cnv gemtools pipeline`_ 
 
 .. _jip cnv gemtools pipeline: ../../../jip-doc/build/html/index.html
 
