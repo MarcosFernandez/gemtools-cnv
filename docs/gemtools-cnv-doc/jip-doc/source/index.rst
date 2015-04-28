@@ -111,7 +111,9 @@ Creation and submission of a set of jip jobs to perform the pipeline running acc
 
 .. seealso::
 
-    To know more about the CNV PIPELINE results check **GEMTOOLS CNV PIPELINE** documentation.
+    To know more about the CNV PIPELINE results check `GEMTOOLS CNV PIPELINE`_ documentation.
+
+.. _GEMTOOLS CNV PIPELINE: http://statgen.cnag.cat/docgemtoolscnv/gemtools/index.html
 
 
 

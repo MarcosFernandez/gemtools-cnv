@@ -13,6 +13,17 @@ In addition to the library functionality, GEM-Tools-cnv also provides a command
 line tool `gemtools-cnv`, that you can use to start the CNV pipeline and various
 other tools, like the indexer and the statistics module or RNASeq pipeline.
 
+
+Documentation
+-------------
+
+To know more about how to use GEM-Tools-cnv to perform Copy number calls visit 
+[Gemtools cnv Pipeline Documentation] (http://statgen.cnag.cat/docgemtoolscnv/gemtools/index.html).
+
+If you have JIP pipeline system visit [CNV Pipeline with JIP] (http://statgen.cnag.cat/docgemtoolscnv/). And run the pipeline 
+with Three Steps.
+
+
 Licensing
 ---------
 The Python modules also distributes current GEM binaries that are compatible

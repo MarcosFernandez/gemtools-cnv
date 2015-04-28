@@ -21,7 +21,7 @@ Install the jip pipeline system following the instructions found in: `http://pyj
 2) Download and install gemtools-cnv
 ------------------------------------
 
-Download and install **gemtools-cnv** in your system. If that goes well, you will have a "gemtools-cnv" command line tool available.
+Download and install `GEMTools-CNV <https://github.com/MarcosFernandez/gemtols-cnv>`_ in your system. If that goes well, you will have a ``gemtools-cnv`` command line tool available.
 
 
 3) Masking the reference
@@ -107,5 +107,14 @@ _______________________
 Creation and submission of a set of jip jobs to perform the pipeline running according to a configuration file.  ::
 
     cnv_pipeline.jip  -c my_pipeline_cfg.json -i my_fastq_dir/*_1.fastq.gz -o ./MY_SAMPLE_DIR/ -n SAMPLE_NAME  -d SAMPLE_DESCRIPTION --gz -- submit -P development --dry --show
+
+
+.. seealso::
+
+    To know more about the CNV PIPELINE results check `GEMTOOLS CNV PIPELINE`_ documentation.
+
+.. _GEMTOOLS CNV PIPELINE: http://statgen.cnag.cat/docgemtoolscnv/gemtools/index.html
+
+
 
 
