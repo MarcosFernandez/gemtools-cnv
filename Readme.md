@@ -20,8 +20,8 @@ Documentation
 To know more about how to use GEM-Tools-cnv to perform Copy number calls visit 
 [Gemtools cnv Pipeline Documentation] (http://statgen.cnag.cat/docgemtoolscnv/gemtools/index.html).
 
-If you have JIP pipeline system visit [CNV Pipeline with JIP] (http://statgen.cnag.cat/docgemtoolscnv/). And run the pipeline 
-with Three Steps.
+If you have JIP pipeline system visit [CNV Pipeline with JIP] (http://statgen.cnag.cat/docgemtoolscnv/). Run the pipeline 
+in Three Steps!!
 
 
 Licensing
