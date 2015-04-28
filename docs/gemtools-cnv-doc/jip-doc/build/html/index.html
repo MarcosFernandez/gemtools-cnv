@@ -61,8 +61,12 @@
 <h2>2) Download and install gemtools-cnv<a class="headerlink" href="#download-and-install-gemtools-cnv" title="Permalink to this headline">¶</a></h2>
 <p>Download and install <a class="reference external" href="https://github.com/MarcosFernandez/gemtols-cnv">GEMTools-CNV</a> in your system. If that goes well, you will have a <tt class="docutils literal"><span class="pre">gemtools-cnv</span></tt> command line tool available.</p>
 </div>
+<div class="section" id="download-jip-cnv-pipeline-scripts">
+<h2>3) Download JIP CNV pipeline scripts<a class="headerlink" href="#download-jip-cnv-pipeline-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Download <a class="reference external" href="https://github.com/MarcosFernandez/JIPcnvPipeline">JIP CNV pipeline scripts</a></p>
+</div>
 <div class="section" id="masking-the-reference">
-<h2>3) Masking the reference<a class="headerlink" href="#masking-the-reference" title="Permalink to this headline">¶</a></h2>
+<h2>4) Masking the reference<a class="headerlink" href="#masking-the-reference" title="Permalink to this headline">¶</a></h2>
 <p>Reference masking in gaps and repeats locations. It also creates an <em>index</em> for <a class="reference external" href="http://bio-bwa.sourceforge.net/bwa.shtml">bwa</a> mapper, <em>index</em> for the masked reference for <a class="reference external" href="http://algorithms.cnag.cat/wiki/The_GEM_library">gem mapper</a> and a <em>configuration</em> file from the padded masked reference to perform copy number calls using <a class="reference external" href="http://mrcanavar.sourceforge.net/">mrCaNaVaR</a>.</p>
 <div class="highlight-python"><pre>cnv_assembly_preparation.jip -f my_reference.fa -t 8 -r repeat_masker.bed tandem_repeats.bed -g gaps.bed -a chromInfo.txt -o out_dir</pre>
 </div>
@@ -76,7 +80,7 @@
 </div>
 </div>
 <div class="section" id="run-configuration-file">
-<h2>4) Run configuration file<a class="headerlink" href="#run-configuration-file" title="Permalink to this headline">¶</a></h2>
+<h2>5) Run configuration file<a class="headerlink" href="#run-configuration-file" title="Permalink to this headline">¶</a></h2>
 <p>Creates a configuration json file for the cnv pipeline. This <strong>JSON</strong> file is used to manage the pipeline. <strong>By default</strong>, is performed the <strong>long pipeline</strong> (removing PCR duplicates) and assumes that input data is <strong>paired end</strong>.</p>
 <div class="highlight-python"><pre>createConfigurationFile.py -bwa-reference my_reference.fa -gem-index my_reference_kmer_mask_mask-fasta.gem -reference-conf my_reference_pad36_padded-fasta.conf  --json-file my_pipeline_cfg.json -- submit --dry --show</pre>
 </div>
@@ -92,7 +96,7 @@
 </dl>
 </div></blockquote>
 <div class="section" id="mandatory-arguments">
-<h3>4.1 Mandatory arguments<a class="headerlink" href="#mandatory-arguments" title="Permalink to this headline">¶</a></h3>
+<h3>5.1 Mandatory arguments<a class="headerlink" href="#mandatory-arguments" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><p>There are four arguments which are mandatory when creating the pipeline configuration.</p>
 <p>Mandatory arguments:</p>
@@ -115,13 +119,13 @@
 </div>
 </div>
 <div class="section" id="run-the-pipeline">
-<h2>5) Run the pipeline<a class="headerlink" href="#run-the-pipeline" title="Permalink to this headline">¶</a></h2>
+<h2>6) Run the pipeline<a class="headerlink" href="#run-the-pipeline" title="Permalink to this headline">¶</a></h2>
 <p>Creation and submission of a set of jip jobs to perform the pipeline running according to a configuration file.</p>
 <div class="highlight-python"><pre>cnv_pipeline.jip  -c my_pipeline_cfg.json -i my_fastq_dir/*_1.fastq.gz -o ./MY_SAMPLE_DIR/ -n SAMPLE_NAME  -d SAMPLE_DESCRIPTION --gz -- submit -P development --dry --show</pre>
 </div>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last">To know more about the CNV PIPELINE results check <strong>GEMTOOLS CNV PIPELINE</strong> documentation.</p>
+<p class="last">To know more about the CNV PIPELINE results check <a class="reference external" href="http://statgen.cnag.cat/docgemtoolscnv/gemtools/index.html">GEMTOOLS CNV PIPELINE</a> documentation.</p>
 </div>
 </div>
 </div>
@@ -137,12 +141,13 @@
 <li><a class="reference internal" href="#">JIP GEM CNV PIPELINE  Quickstart</a><ul>
 <li><a class="reference internal" href="#download-and-install-jip-pipeline-system">1) Download and install JIP PIPELINE system</a></li>
 <li><a class="reference internal" href="#download-and-install-gemtools-cnv">2) Download and install gemtools-cnv</a></li>
-<li><a class="reference internal" href="#masking-the-reference">3) Masking the reference</a></li>
-<li><a class="reference internal" href="#run-configuration-file">4) Run configuration file</a><ul>
-<li><a class="reference internal" href="#mandatory-arguments">4.1 Mandatory arguments</a></li>
+<li><a class="reference internal" href="#download-jip-cnv-pipeline-scripts">3) Download JIP CNV pipeline scripts</a></li>
+<li><a class="reference internal" href="#masking-the-reference">4) Masking the reference</a></li>
+<li><a class="reference internal" href="#run-configuration-file">5) Run configuration file</a><ul>
+<li><a class="reference internal" href="#mandatory-arguments">5.1 Mandatory arguments</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#run-the-pipeline">5) Run the pipeline</a></li>
+<li><a class="reference internal" href="#run-the-pipeline">6) Run the pipeline</a></li>
 </ul>
 </li>
 </ul>

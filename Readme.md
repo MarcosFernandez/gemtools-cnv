@@ -133,7 +133,7 @@ Clone the repository
 
 Change into the gemtools folder and install the python library
 
-    cd gemtools
+    cd gemtools-cnv
 
 As root:
     

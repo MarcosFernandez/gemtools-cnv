@@ -24,7 +24,13 @@ Install the jip pipeline system following the instructions found in: `http://pyj
 Download and install `GEMTools-CNV <https://github.com/MarcosFernandez/gemtols-cnv>`_ in your system. If that goes well, you will have a ``gemtools-cnv`` command line tool available.
 
 
-3) Masking the reference
+3) Download JIP CNV pipeline scripts
+------------------------------------
+
+Download `JIP CNV pipeline scripts <https://github.com/MarcosFernandez/JIPcnvPipeline>`_ 
+
+
+4) Masking the reference
 ------------------------
 
 Reference masking in gaps and repeats locations. It also creates an *index* for `bwa`_ mapper, *index* for the masked reference for `gem mapper`_ and a *configuration* file from the padded masked reference to perform copy number calls using `mrCaNaVaR`_. ::
@@ -46,7 +52,7 @@ Reference masking in gaps and repeats locations. It also creates an *index* for 
 .. _bwa: http://bio-bwa.sourceforge.net/bwa.shtml 
 
 
-4) Run configuration file
+5) Run configuration file
 -------------------------
 
 Creates a configuration json file for the cnv pipeline. This **JSON** file is used to manage the pipeline. **By default**, is performed the **long pipeline** (removing PCR duplicates) and assumes that input data is **paired end**. ::
@@ -70,7 +76,7 @@ These are the main parameters:
 
 
 
-4.1 Mandatory arguments
+5.1 Mandatory arguments
 _______________________
 
     There are four arguments which are mandatory when creating the pipeline configuration.
@@ -101,7 +107,7 @@ _______________________
 
 
 
-5) Run the pipeline
+6) Run the pipeline
 -------------------
 
 Creation and submission of a set of jip jobs to perform the pipeline running according to a configuration file.  ::
