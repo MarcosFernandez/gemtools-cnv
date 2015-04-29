@@ -16,6 +16,10 @@ GEMTools-cnv/Makefile.mk
 GEMTools-cnv/bam2fastq/HISTORY.txt
 GEMTools-cnv/bam2fastq/LICENSE
 GEMTools-cnv/bam2fastq/Makefile
+<<<<<<< HEAD
+=======
+GEMTools-cnv/bam2fastq/Makefile~
+>>>>>>> a4ca1aa06be0a6eb8359b79e391ddbb7c7cee82c
 GEMTools-cnv/bam2fastq/README.txt
 GEMTools-cnv/bam2fastq/bam2fastq.cpp
 GEMTools-cnv/bam2fastq/bam2fastq.o
@@ -243,6 +247,10 @@ GEMTools-cnv/mrcanavar/BUGS
 GEMTools-cnv/mrcanavar/Changelog
 GEMTools-cnv/mrcanavar/LICENSE
 GEMTools-cnv/mrcanavar/Makefile
+<<<<<<< HEAD
+=======
+GEMTools-cnv/mrcanavar/Makefile~
+>>>>>>> a4ca1aa06be0a6eb8359b79e391ddbb7c7cee82c
 GEMTools-cnv/mrcanavar/TODO
 GEMTools-cnv/mrcanavar/callcnv.c
 GEMTools-cnv/mrcanavar/callcnv.h
@@ -261,11 +269,21 @@ GEMTools-cnv/mrcanavar/utils.c
 GEMTools-cnv/mrcanavar/utils.h
 GEMTools-cnv/src/FastqSplitter.cpp
 GEMTools-cnv/src/Makefile
+<<<<<<< HEAD
+=======
+GEMTools-cnv/src/Makefile~
+>>>>>>> a4ca1aa06be0a6eb8359b79e391ddbb7c7cee82c
 GEMTools-cnv/src/MergeCoord.cpp
 GEMTools-cnv/src/kmerCount.cpp
 GEMTools-cnv/src/makeBedIntervalsAssembly.cpp
 GEMTools-cnv/src/twoPartOvpMgsrt.cpp
+<<<<<<< HEAD
 GEMTools-cnv/tools/Makefile
+=======
+GEMTools-cnv/src/twoPartOvpMgsrt.cpp~
+GEMTools-cnv/tools/Makefile
+GEMTools-cnv/tools/Makefile~
+>>>>>>> a4ca1aa06be0a6eb8359b79e391ddbb7c7cee82c
 GEMTools-cnv/tools/kmermaker.c
 GEMTools-cnv/tools/kmermaker.h
 GEMTools/bin/align_stats

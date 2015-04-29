@@ -54,4 +54,3 @@ clean:
 	@rm -rf $(FOLDER_BIN) $(FOLDER_BUILD) $(FOLDER_LIB)
 	$(MAKE) --directory=bam2fastq clean
         $(MAKE) --directory=bam2fastq/samtools  clean
-        	
