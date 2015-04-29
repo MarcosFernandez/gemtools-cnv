@@ -442,7 +442,7 @@ https://github.com/gemtools/gemtools
           'Programming Language :: C++',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
         ],
-        setup_requires=["cython>=0.19.1"],
+        setup_requires=["cython>=0.19.1","ipython>=3.1.0"],
         install_requires=[
                 "argparse",
 #                "numpy==1.7.0",
