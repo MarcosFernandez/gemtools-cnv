@@ -1,0 +1,202 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>3.1) Fast CNV Pipeline &mdash; GEMTOOLS CNV PIPELINE 1.6.0.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GEMTOOLS CNV PIPELINE 1.6.0.0 documentation" href="index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> GEMTOOLS CNV PIPELINE</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">3.1) Fast CNV Pipeline</a><ul>
+<li><a class="reference internal" href="#fastq-chopping-and-fragmentation">3.1.1) FASTQ chopping and fragmentation</a></li>
+<li><a class="reference internal" href="#alignment-to-the-masked-reference">3.1.2) Alignment to the masked reference</a></li>
+<li><a class="reference internal" href="#copy-number-calling">3.1.3) Copy Number Calling</a></li>
+</ul>
+</li>
+</ul>
+</div>
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">GEMTOOLS CNV PIPELINE</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>3.1) Fast CNV Pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/fast_pipeline.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="fast-cnv-pipeline">
+<h1>3.1) Fast CNV Pipeline<a class="headerlink" href="#fast-cnv-pipeline" title="Permalink to this headline">¶</a></h1>
+<p>Fast Copy Number pipeline version.</p>
+<p>Performs a mapping of the FASTQ sequencing reads against a <strong>masked reference</strong> and using a <strong>configuration reference file</strong> to call copy number values.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Fast CNV Pipeline does not perform a PCR duplicates filtering.</p>
+</div>
+<div class="section" id="fastq-chopping-and-fragmentation">
+<h2>3.1.1) FASTQ chopping and fragmentation<a class="headerlink" href="#fastq-chopping-and-fragmentation" title="Permalink to this headline">¶</a></h2>
+<p>FASTQ input data can be fragmented in a set of chunks to speed up the mapping process. Each chunk can be mapped in parallel according to your computing resources.</p>
+<p>Furthermore, reads are chopped to 36 base pairs to not loose mapping information around masked regions. By default, the first ten bases are removed because unexpected tendencies of nucletide distribution are usually found. Nonetheless, this pattern should be confirmed through <a class="reference external" href="http://www.bioinformatics.babraham.ac.uk/projects/fastqc/">fastqc</a> analysis.</p>
+<div class="highlight-python"><pre>gemtools-cnv fastq-splitter  -f my_fastq_1.fastq.gz -split-times 50 -kmer-length 36 -windowing 36 -first-position 10 -n my_fastq_name --gz --threads 8</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you do not specify <tt class="docutils literal"><span class="pre">--single</span></tt> to disable read pairing, then is going to look automatically for the second pair file if you only
+specify one file.
+For that to work, the second file has to end with either <tt class="docutils literal"><span class="pre">.2</span></tt> or <tt class="docutils literal"><span class="pre">_2</span></tt>, with the file extension <tt class="docutils literal"><span class="pre">.fastq</span></tt> or <tt class="docutils literal"><span class="pre">.txt</span></tt> (+ <tt class="docutils literal"><span class="pre">.gz</span></tt> for compressed files).</p>
+</div>
+</div>
+<div class="section" id="alignment-to-the-masked-reference">
+<h2>3.1.2) Alignment to the masked reference<a class="headerlink" href="#alignment-to-the-masked-reference" title="Permalink to this headline">¶</a></h2>
+<p>Aligns reads against a <em>masked reference genome</em> using <a class="reference external" href="http://algorithms.cnag.cat/wiki/The_GEM_library">gem mapper</a>. Maps in <em>single en mode</em>, with the goal of generating a set of mappings to later perform a copy number calling based on Read Depth.</p>
+<div class="highlight-python"><pre>gemtools-cnv cnv-mapping -f my_fastq_chop-reads.part-1.1.fq -i my_reference_kmer_mask_mask-fasta.gem -n my_mapping_name  --mappin-stats-json -T 8</pre>
+</div>
+</div>
+<div class="section" id="copy-number-calling">
+<h2>3.1.3) Copy Number Calling<a class="headerlink" href="#copy-number-calling" title="Permalink to this headline">¶</a></h2>
+<p>Runs <a class="reference external" href="http://mrcanavar.sourceforge.net/">mrCaNaVaR</a>  to calculate read depth for a set of different kind of windows spanning all the genome. (Long Windows, Short Windows, Copy Windows). After a GC content correction a copy number call is performed.</p>
+<p>It also generates a HTML Pipeline report with different statistics and plots.</p>
+<div class="highlight-python"><pre>gemtools-cnv cnv-call -d /mappings/map-sam/ --conf_file my_reference_pad36_padded-fasta.conf --gz --no-duplications -sample-description description -n my_name</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Marcos Fernandez-Callejo, Santiago Marco-Sola, Thasso Griebel.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'',
+            VERSION:'1.6.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>3.2) Long CNV Pipeline &mdash; GEMTOOLS CNV PIPELINE 1.6.0.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GEMTOOLS CNV PIPELINE 1.6.0.0 documentation" href="index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> GEMTOOLS CNV PIPELINE</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">3.2) Long CNV Pipeline</a></li>
+<li><a class="reference internal" href="#index-reference">3.2.0) Index reference</a></li>
+<li><a class="reference internal" href="#basic-mapping">3.2.1) Basic Mapping</a></li>
+<li><a class="reference internal" href="#remove-duplicates">3.2.2) Remove Duplicates</a></li>
+<li><a class="reference internal" href="#bam-alignment-file-to-chopped-fastq">3.2.3) BAM alignment file to chopped FASTQ</a><ul>
+<li><a class="reference internal" href="#alignment-to-the-masked-reference">3.2.4) Alignment to the masked reference</a></li>
+<li><a class="reference internal" href="#copy-number-calling">3.2.5) Copy Number Calling</a></li>
+</ul>
+</li>
+</ul>
+</div>
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">GEMTOOLS CNV PIPELINE</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>3.2) Long CNV Pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/long_pipeline.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="long-cnv-pipeline">
+<h1>3.2) Long CNV Pipeline<a class="headerlink" href="#long-cnv-pipeline" title="Permalink to this headline">¶</a></h1>
+<p>Long Copy Number pipeline version.</p>
+<p>Firstly, looks for PCR Duplicates using <a class="reference external" href="http://bio-bwa.sourceforge.net/bwa.shtml">bwa mem</a> for mapping reads against a <em>raw fasta reference</em> and <a class="reference external" href="http://broadinstitute.github.io/picard/command-line-overview.html#MarkDuplicates">MarkDuplicates</a> to perform PCR artifacts removal.</p>
+<p>Secondly, transforms the <strong>BAM</strong> alignment file, free of duplicates, to FASTQ and performs a mapping with <a class="reference external" href="http://algorithms.cnag.cat/wiki/The_GEM_library">gem</a> to make a call of copy number.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The process of looking for PCR Duplicates adds a significant cost on time and computing resources. You should consider this, if you
+already know that the percentage of duplicates is very low or 0 in your libraries then it is better to run the <strong>fast cnv pipeline</strong>.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><a class="reference external" href="http://www.cureffi.org/2012/12/11/how-pcr-duplicates-arise-in-next-generation-sequencing/">PCR Duplicates</a> are artifacts generated at <em>library level</em>. Then, you must use as input data all FASTQ files that comes from the same
+DNA library sample preparation. Duplicates reads can be found in different lanes and files.</p>
+</div>
+</div>
+<div class="section" id="index-reference">
+<h1>3.2.0) Index reference<a class="headerlink" href="#index-reference" title="Permalink to this headline">¶</a></h1>
+<p>As <a class="reference external" href="http://bio-bwa.sourceforge.net/bwa.shtml">bwa mem</a> is going to be used as aligner we must index our raw fasta reference. Run <em>index</em> command only once for a new reference genome assembly</p>
+<div class="highlight-python"><pre>bwa index my_raw_reference.fa</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For removing duplicates it is not necessary to mask the reference as we must do for the copy number mapping. Indeed, we must map against the raw reference
+to get a good estimation of the real duplicate percentage and to not ignore those duplicate reads involved in repeat regions.</p>
+</div>
+</div>
+<div class="section" id="basic-mapping">
+<h1>3.2.1) Basic Mapping<a class="headerlink" href="#basic-mapping" title="Permalink to this headline">¶</a></h1>
+<p>Basic mapping with standard <a class="reference external" href="http://bio-bwa.sourceforge.net/bwa.shtml">bwa mem</a> parameters.</p>
+<dl class="glossary docutils">
+<dt id="term-input-file-detection">Input file detection</dt>
+<dd>If you do not specify <tt class="docutils literal"><span class="pre">--single</span></tt> to disable read pairing, it will look automatically for the second pair file in case you only specify one file.
+For that to work, the second file has to end with .2 or _2, with the file extension .fastq or .txt (+ .gz for compressed files).</dd>
+<dt id="term-picard-tools">Picard Tools</dt>
+<dd>Basic Mapping is going to use Picard Tools for some of the steps to perform. You must provide the path were Picard Tools is located.</dd>
+</dl>
+<div class="highlight-python"><pre>gemtools-cnv basic-mapping -f my_fastq_1.fastq.gz -bwa-ref my_raw_reference.fa -T 8 -sample-description description -picard-path /path/picard/tools/ -tmp-folder $tmp</pre>
+</div>
+</div>
+<div class="section" id="remove-duplicates">
+<h1>3.2.2) Remove Duplicates<a class="headerlink" href="#remove-duplicates" title="Permalink to this headline">¶</a></h1>
+<p>Remove Duplicates looks for PCR artifacts in all input BAMS and outputs a new <em>BAM</em> alignment file free of duplicates. It also generates a HTML report with Remove Duplicates statistics.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">In order to detect all possible PCR duplicates you should use as input all reads for given library. You can specify a list of all <em>BAM</em> alignment files.</p>
+</div>
+<div class="highlight-python"><pre>gemtools-cnv remove-duplicates -f file_1.bam file_2.bam -picard-path /path/picard/tools/ -java-heap 25g -tmp-folder $tmp -sample-description description</pre>
+</div>
+</div>
+<div class="section" id="bam-alignment-file-to-chopped-fastq">
+<h1>3.2.3) BAM alignment file to chopped FASTQ<a class="headerlink" href="#bam-alignment-file-to-chopped-fastq" title="Permalink to this headline">¶</a></h1>
+<p>Transforms a <em>BAM</em> alignment file to a set of <em>FASTQ</em> sequencing files. The idea is to <em>speed up</em> the mapping process creating a mapping job per each <em>FASTQ</em> generated. You should decide the number of chunks according to your computing resources.</p>
+<dl class="glossary docutils">
+<dt id="term-bam-treatment">BAM treatment</dt>
+<dd>The bam file will be treated as <em>paired end</em> unless you specify <tt class="docutils literal"><span class="pre">-single-end</span></tt> argument.</dd>
+<dt id="term-chopping">Chopping</dt>
+<dd>Reads are chopped to 36 base pairs to not loose mapping information around masked regions.</dd>
+<dt id="term-filtering">Filtering</dt>
+<dd>By default, the first ten bases are removed because unexpected tendencies of nucletide distribution are usually found.
+Nonetheless, this pattern should be confirmed through <a class="reference external" href="http://www.bioinformatics.babraham.ac.uk/projects/fastqc/">fastqc</a> analysis.</dd>
+</dl>
+<div class="highlight-python"><pre>gemtools-cnv bam-2-fastq -f my_file_rm-dups.rmdup.bam -split-times 20 -n sample_name --threads 8</pre>
+</div>
+<div class="section" id="alignment-to-the-masked-reference">
+<h2>3.2.4) Alignment to the masked reference<a class="headerlink" href="#alignment-to-the-masked-reference" title="Permalink to this headline">¶</a></h2>
+<p>Aligns reads against a <em>masked reference genome</em> using <a class="reference external" href="http://algorithms.cnag.cat/wiki/The_GEM_library">gem mapper</a>. Maps in <em>single en mode</em>, with the goal of generating a set of mappings to later perform a copy number calling based on Read Depth.</p>
+<div class="highlight-python"><pre>gemtools-cnv cnv-mapping -f my_fastq_chop-reads.part-1.1.fq -i my_reference_kmer_mask_mask-fasta.gem -n my_mapping_name  --mappin-stats-json -T 8</pre>
+</div>
+</div>
+<div class="section" id="copy-number-calling">
+<h2>3.2.5) Copy Number Calling<a class="headerlink" href="#copy-number-calling" title="Permalink to this headline">¶</a></h2>
+<p>Runs <a class="reference external" href="http://mrcanavar.sourceforge.net/">mrCaNaVaR</a>  to calculate read depth for a set of different kind of windows spanning all the genome. (Long Windows, Short Windows, Copy Windows). After a GC content correction a copy number call is performed.</p>
+<p>It also generates a HTML Pipeline report with different statistics and plots.</p>
+<div class="highlight-python"><pre>gemtools-cnv cnv-call -d /mappings/map-sam/ --conf_file my_reference_pad36_padded-fasta.conf --gz --no-duplications -sample-description description -n my_name</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Marcos Fernandez-Callejo, Santiago Marco-Sola, Thasso Griebel.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'',
+            VERSION:'1.6.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

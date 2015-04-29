@@ -1,0 +1,186 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>JIP GEM CNV PIPELINE Quickstart &mdash; JIP GEM CNV PIPELINE 0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="JIP GEM CNV PIPELINE 0.0 documentation" href="#" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="#">JIP GEM CNV PIPELINE 0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="jip-gem-cnv-pipeline-quickstart">
+<h1>JIP GEM CNV PIPELINE  Quickstart<a class="headerlink" href="#jip-gem-cnv-pipeline-quickstart" title="Permalink to this headline">¶</a></h1>
+<p>JIP GEM CNV PIPELINE is a set of jip scripts that uses the <strong>JIP pipeline system</strong> to perform all pipeline steps, controlling each step dependency and output. The pipeline expects to find <strong>JIP pipeline system</strong> and <strong>gemtools-cnv</strong> installed on your system.</p>
+<div class="section" id="download-and-install-jip-pipeline-system">
+<h2>1) Download and install JIP PIPELINE system<a class="headerlink" href="#download-and-install-jip-pipeline-system" title="Permalink to this headline">¶</a></h2>
+<p>The JIP pipeline system is a python library and a set of command line utilities that allows you to create batch-process based computational pipeline that can be submitted and managed on a computer cluster or on your local machine.</p>
+<p>Install the jip pipeline system following the instructions found in: <a class="reference external" href="http://pyjip.readthedocs.org/en/latest/">http://pyjip.readthedocs.org/en/latest/</a></p>
+</div>
+<div class="section" id="download-and-install-gemtools-cnv">
+<h2>2) Download and install gemtools-cnv<a class="headerlink" href="#download-and-install-gemtools-cnv" title="Permalink to this headline">¶</a></h2>
+<p>Download and install <a class="reference external" href="https://github.com/MarcosFernandez/gemtols-cnv">GEMTools-CNV</a> in your system. If that goes well, you will have a <tt class="docutils literal"><span class="pre">gemtools-cnv</span></tt> command line tool available.</p>
+</div>
+<div class="section" id="download-jip-cnv-pipeline-scripts">
+<h2>3) Download JIP CNV pipeline scripts<a class="headerlink" href="#download-jip-cnv-pipeline-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Download <a class="reference external" href="https://github.com/MarcosFernandez/JIPcnvPipeline">JIP CNV pipeline scripts</a></p>
+</div>
+<div class="section" id="masking-the-reference">
+<h2>4) Masking the reference<a class="headerlink" href="#masking-the-reference" title="Permalink to this headline">¶</a></h2>
+<p>Reference masking in gaps and repeats locations. It also creates an <em>index</em> for <a class="reference external" href="http://bio-bwa.sourceforge.net/bwa.shtml">bwa</a> mapper, <em>index</em> for the masked reference for <a class="reference external" href="http://algorithms.cnag.cat/wiki/The_GEM_library">gem mapper</a> and a <em>configuration</em> file from the padded masked reference to perform copy number calls using <a class="reference external" href="http://mrcanavar.sourceforge.net/">mrCaNaVaR</a>.</p>
+<div class="highlight-python"><pre>cnv_assembly_preparation.jip -f my_reference.fa -t 8 -r repeat_masker.bed tandem_repeats.bed -g gaps.bed -a chromInfo.txt -o out_dir</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p><strong>Chromosome Length</strong></p>
+<blockquote class="last">
+<div><p><em>chromInfo.txt</em> must be a file with two fields per row separated by <em>tabulators</em>.</p>
+<p><strong>First</strong> field must be chromosome or conting <strong>name</strong> and <strong>second</strong> field its <strong>length</strong> in base pairs.</p>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="run-configuration-file">
+<h2>5) Run configuration file<a class="headerlink" href="#run-configuration-file" title="Permalink to this headline">¶</a></h2>
+<p>Creates a configuration json file for the cnv pipeline. This <strong>JSON</strong> file is used to manage the pipeline. <strong>By default</strong>, is performed the <strong>long pipeline</strong> (removing PCR duplicates) and assumes that input data is <strong>paired end</strong>.</p>
+<div class="highlight-python"><pre>createConfigurationFile.py -bwa-reference my_reference.fa -gem-index my_reference_kmer_mask_mask-fasta.gem -reference-conf my_reference_pad36_padded-fasta.conf  --json-file my_pipeline_cfg.json -- submit --dry --show</pre>
+</div>
+<p>These are the main parameters:</p>
+<blockquote>
+<div><dl class="glossary docutils">
+<dt id="term-no-duplicates">&#8211;no-duplicates</dt>
+<dd>If specified, do not run remove duplicates steps. (<strong>Fast Pipeline</strong>)</dd>
+<dt id="term-se">-se</dt>
+<dd>If specified, Input FASTQ data is treated as single end.</dd>
+<dt id="term-chunks">&#8211;chunks</dt>
+<dd>Number of chunks to fragment FASTQ input data to later perform a mapping job per chunk. The more chunks, the more parallelization. Default 50.</dd>
+</dl>
+</div></blockquote>
+<div class="section" id="mandatory-arguments">
+<h3>5.1 Mandatory arguments<a class="headerlink" href="#mandatory-arguments" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>There are four arguments which are mandatory when creating the pipeline configuration.</p>
+<p>Mandatory arguments:</p>
+<dl class="glossary docutils">
+<dt id="term-bwa-reference">-bwa-reference</dt>
+<dd>Path to the fasta index were are located the bwa index files.</dd>
+<dt id="term-gem-index">-gem-index</dt>
+<dd>Path to the gem index file of the fasta reference.</dd>
+<dt id="term-reference-conf">-reference-conf</dt>
+<dd>Path to the mrCaNaVar configuration of the reference file</dd>
+<dt id="term-json-file">&#8211;json-file</dt>
+<dd>Pipeline configuration file in <em>json</em> format.</dd>
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p><strong>createConfigurationFile.py</strong></p>
+<p class="last">Check script parameters help to adjust the number of threads, job times, and other specific parameters per each step.</p>
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="run-the-pipeline">
+<h2>6) Run the pipeline<a class="headerlink" href="#run-the-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Creation and submission of a set of jip jobs to perform the pipeline running according to a configuration file.</p>
+<div class="highlight-python"><pre>cnv_pipeline.jip  -c my_pipeline_cfg.json -i my_fastq_dir/*_1.fastq.gz -o ./MY_SAMPLE_DIR/ -n SAMPLE_NAME  -d SAMPLE_DESCRIPTION --gz -- submit -P development --dry --show</pre>
+</div>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">To know more about the CNV PIPELINE results check <a class="reference external" href="http://statgen.cnag.cat/docgemtoolscnv/gemtools/index.html">GEMTOOLS CNV PIPELINE</a> documentation.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">JIP GEM CNV PIPELINE  Quickstart</a><ul>
+<li><a class="reference internal" href="#download-and-install-jip-pipeline-system">1) Download and install JIP PIPELINE system</a></li>
+<li><a class="reference internal" href="#download-and-install-gemtools-cnv">2) Download and install gemtools-cnv</a></li>
+<li><a class="reference internal" href="#download-jip-cnv-pipeline-scripts">3) Download JIP CNV pipeline scripts</a></li>
+<li><a class="reference internal" href="#masking-the-reference">4) Masking the reference</a></li>
+<li><a class="reference internal" href="#run-configuration-file">5) Run configuration file</a><ul>
+<li><a class="reference internal" href="#mandatory-arguments">5.1 Mandatory arguments</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#run-the-pipeline">6) Run the pipeline</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="#">JIP GEM CNV PIPELINE 0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Marcos Fernandez-Callejo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
