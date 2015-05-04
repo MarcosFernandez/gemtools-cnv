@@ -158,7 +158,10 @@ executables = execs_dict({
     "makeHistogramCounts.R": "makeHistogramCounts.R",
     "makeBedIntervalsAssembly": "makeBedIntervalsAssembly",
     "kmerCount": "kmerCount",
-    "galculator": "galculator"
+    "galculator": "galculator",
+    "wssd_picker.pl": "wssd_picker.pl",
+    "twoPartOvpMgsrt": "twoPartOvpMgsrt", 
+    "MergeCoord" : "MergeCoord"
     })
 
 
@@ -1028,7 +1031,7 @@ def callDuplications(input, output = None, sampleName = None,bed_repeat_regions 
     """
 
     duplication = gem.duplications.Duplications(sampleName,bedRepeatRegions=bed_repeat_regions,gapsBedCoord=bed_gaps_coordinates,
-                                                cutOffFile=input[1][1], pathMrCanavar=input[0][0],outputlist=output)
+                                                cutOffFile=input[1][1], pathMrCanavar=input[0][0],outputlist=output,execs=executables)
 
     #First Method
     duplication.runMethod1Duplications()

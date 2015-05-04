@@ -5,12 +5,12 @@ import gem
 import re
 
 from . import utils
-from gem.__init__ import execs_dict
+
 
 class Duplications(object):
 
     """General parameters class"""
-    def __init__(self, sample, bedRepeatRegions=None, gapsBedCoord=None,cutOffFile=None,pathMrCanavar=None,outputlist=None):
+    def __init__(self, sample, bedRepeatRegions=None, gapsBedCoord=None,cutOffFile=None,pathMrCanavar=None,outputlist=None,execs=None):
         self.sample = sample        
         self.bedRepeatRegions = bedRepeatRegions
         self.gapsBedCoord = gapsBedCoord
@@ -36,11 +36,7 @@ class Duplications(object):
         self.prepare_outputs(outputlist)
         
         ## paths to the executables
-        self.executables = execs_dict({
-             "wssd_picker.pl": "wssd_picker.pl",
-             "twoPartOvpMgsrt": "twoPartOvpMgsrt", 
-             "MergeCoord" : "MergeCoord"
-        })        
+        self.executables = execs
         
         
         
