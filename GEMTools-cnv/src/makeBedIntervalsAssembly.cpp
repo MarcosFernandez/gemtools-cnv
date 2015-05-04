@@ -75,7 +75,8 @@ int main(int argc, char **argv)
 		//end
 		strcat(currentLine, "\t");
 		sprintf(sEnd, "%d", (end));
-		strcat(currentLine, "\n");
+		strcat(currentLine, sEnd);
+                strcat(currentLine, "\n");
 
 		//Print to File
 		fwrite (currentLine , 1, strlen(currentLine), fout);
