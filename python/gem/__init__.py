@@ -108,6 +108,7 @@ class execs_dict(dict):
     def __getitem__(self, item):
         # check if there is an environment variable set
         # to specify the path to the GEM executables
+           
         base_dir = os.getenv("GEM_PATH", None)
         if base_dir is not None:
             file = "%s/%s" % (base_dir, item)
@@ -148,11 +149,16 @@ executables = execs_dict({
     "gt.mapset": "gt.mapset",
     "gt.gtfcount": "gt.gtfcount",
     "gt.stats": "gt.stats",
+    "bam2fastq": "bam2fastq",
+    "FastqSplitter": "FastqSplitter",
     "kmermaker": "kmermaker",
-    "gt-scorereads":"gt.scorereads",
-    "RscriptCN":"copyNumberDistribution.R",
-    "makeBedIntervals":"makeBedIntervalsAssembly",
-    "countKmers":"countKmerMappings.py"
+    "gt-scorereads": "gt.scorereads",
+    "mrcanavar": "mrcanavar",
+    "copyNumberDistribution.R": "copyNumberDistribution.R",
+    "makeHistogramCounts.R": "makeHistogramCounts.R",
+    "makeBedIntervalsAssembly": "makeBedIntervalsAssembly",
+    "kmerCount": "kmerCount",
+    "galculator": "galculator"
     })
 
 
@@ -681,7 +687,7 @@ def bamToFastq(input,output=None):
     """
     
      ## prepare the input
-    pa = ['bam2fastq',
+    pa = [executables['bam2fastq'],
           '-o',output,
           input]
           
@@ -706,7 +712,7 @@ def fragmentFastq(inputs,output=None,split_times=100,gz=False,prefix="",threads=
         is_single = False
 
     if is_single:
-        splitter = ["FastqSplitter","--n-parts",str(split_times),"--prefix",prefix]
+        splitter = [executables['FastqSplitter'],"--n-parts",str(split_times),"--prefix",prefix]
         
         if gz:
             splitter.append("--gz")
@@ -720,14 +726,14 @@ def fragmentFastq(inputs,output=None,split_times=100,gz=False,prefix="",threads=
             raise ValueError("Error while  Fastq Splitter")
             
     else:
-        splitterOne = ["FastqSplitter","--n-parts",str(split_times),"--prefix",prefix + ".1"]
+        splitterOne = [executables['FastqSplitter'],"--n-parts",str(split_times),"--prefix",prefix + ".1"]
 
         if gz:
             splitterOne.append("--gz")
             
         splitterOne.append(inputs[0])
 
-        splitterTwo = ["FastqSplitter","--n-parts",str(split_times),"--prefix",prefix + ".2"]
+        splitterTwo = [executables['FastqSplitter'],"--n-parts",str(split_times),"--prefix",prefix + ".2"]
         
         if gz:
             splitterTwo.append("--gz")
@@ -911,14 +917,6 @@ def mapToSam(input,index,output=None,name=None,threads=8,sort_memory="768M"):
 
     tools.append(bamToSort) 
    
-    #bam sam
-    #bamToSam = ['samtools', 'view',
-    #            '-h',
-    #            '-'
-    #]
-    
-    #tools.append(bamToSam)
-    
     ##compress mappings
     gzip = _compressor(threads=max(1, int(threads) / 2))
     tools.append(gzip) 
@@ -938,7 +936,7 @@ def mrCanavarReadDepth(input,conf_file = None, depth_file = None, gzipped = Fals
     """        
     
     ## prepare input compute read depth
-    readDepth = ['mrcanavar',
+    readDepth = [executables['mrcanavar'],
           '--read','-conf',conf_file,
           '-samdir', input,
           '-depth', depth_file
@@ -969,7 +967,7 @@ def mrCanavarCalls(input,conf_file = None, calls_file = None):
     """        
     
     ## prepare the input copy number call
-    copyNumber = ['mrcanavar',
+    copyNumber = [executables['mrcanavar'],
           '--call','-conf',conf_file,
           '-depth', input,
           '-o', calls_file
@@ -1001,7 +999,7 @@ def copyNumberDistribution(input,output = None, sampleName = None):
     control_regions_distribution_file = output[3]
     
     ## prepare input R script
-    cnRScript = [executables['RscriptCN'],
+    cnRScript = [executables['copyNumberDistribution.R'],
                  '-sample=' + sampleName,
                  '-cw=' + copyWindowsBed,
                  '-cn=' + copyNumberBed,
@@ -1657,7 +1655,7 @@ def prep(input, output, gaps=None,lw_size=None,lw_slide=None,sw_size=None,\
        pseudoa - Coordinates for pseudoautosomal regions in the reference genome in BED format
     """
     canavar = [
-        'mrcanavar','--prep',
+        executables['mrcanavar'],'--prep',
         '-fasta',input,
         '-gaps',gaps,
         '-conf',output,
@@ -1976,7 +1974,7 @@ def buildAssemblyKmers(input=None,output=None,reference=None,threads=1):
         processIntervals = []        
         for tasks in parallelTasks:
             chrOutBed = pathOut + "/" + tasks[0]  + ".bed"
-            makeBedInterval = [executables['makeBedIntervals'],
+            makeBedInterval = [executables['makeBedIntervalsAssembly'],
                            "-chrName",tasks[0],
                            "-chrLen",tasks[1],
                            "-outFile",chrOutBed
@@ -2048,13 +2046,7 @@ def kmerCounts(input=None,output=None):
         output - list of bed output results """
     
     for (mapFile,bedFile) in zip(input,output):
-        #counter = [executables['countKmers'],
-        #           '-kmersMap',mapFile,
-        #           '-kmersCount',bedFile
-        #           ]
-        #tools = [counter]
-        
-        counter = ["kmerCount",
+        counter = [executables['kmerCount'],
                    mapFile,
                    bedFile
                    ]
@@ -2084,7 +2076,7 @@ def distributionPlot(input=None,output=None,hits=None):
     if processOne.wait() != 0:
         raise ValueError("Error while running distribution plot, merging step")
     
-    buildHistogram = ["makeHistogramCounts.R",
+    buildHistogram = [executables['makeHistogramCounts.R'],
                       "--countFile=" + output[0], 
                       "--pngPlot=" + output[1], 
                       "--histoPlot=" + output[2],
@@ -2217,7 +2209,7 @@ def galculator(input=None,output=None):
     input - Path to the fasta file to be processed    
     output - File to store galculator results
     """
-    galculator = ["galculator",input]  
+    galculator = [executables["galculator"],input]  
     tools = [galculator]
 
     #Run Create merging bed

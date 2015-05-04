@@ -423,7 +423,18 @@ https://github.com/gemtools/gemtools
                                                                      "gem-indexer_fasta2meta+cont",
                                                                      "gem-info",
                                                                      "gem-mapper",
-                                                                     "gem-rna-tools"
+                                                                     "gem-rna-tools",
+                                                                     "makeBedIntervalsAssembly",
+                                                                     "kmerCount",
+                                                                     "makeHistogramCounts.R",
+                                                                     "bam2fastq",
+                                                                     "FastqSplitter",
+                                                                     "mrcanavar",
+                                                                     "copyNumberDistribution.R",
+                                                                     "wssd_picker.pl",
+                                                                     "twoPartOvpMgsrt",
+                                                                     "MergeCoord",
+                                                                     "galculator"
                                                                      ]]},
         ext_modules=[gemtools],
         test_suite='nose.collector',
@@ -442,7 +453,7 @@ https://github.com/gemtools/gemtools
           'Programming Language :: C++',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
         ],
-        setup_requires=["cython>=0.19.1","ipython>=3.1.0"],
+        setup_requires=["cython>=0.19.1"],
         install_requires=[
                 "argparse",
 #                "numpy==1.7.0",

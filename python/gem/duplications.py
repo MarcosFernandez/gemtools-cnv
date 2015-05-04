@@ -5,6 +5,7 @@ import gem
 import re
 
 from . import utils
+from gem.__init__ import execs_dict
 
 class Duplications(object):
 
@@ -34,13 +35,15 @@ class Duplications(object):
         
         self.prepare_outputs(outputlist)
         
-        
         ## paths to the executables
-        self.executables = {
-             "wssd_picker": "wssd_picker.pl",
+        self.executables = execs_dict({
+             "wssd_picker.pl": "wssd_picker.pl",
              "twoPartOvpMgsrt": "twoPartOvpMgsrt", 
              "MergeCoord" : "MergeCoord"
-        }
+        })        
+        
+        
+        
 
     def getCanavarPath(self,pathMrCanavar):
         """Return directory name of the file poited by pathMrCanavar"""
