@@ -14,6 +14,9 @@ line tool `gemtools-cnv`, that you can use to start the CNV pipeline and various
 other tools, like the indexer and the statistics module or RNASeq pipeline.
 
 
+    This package works properly using Python 2.7.5
+
+
 Documentation
 -------------
 
