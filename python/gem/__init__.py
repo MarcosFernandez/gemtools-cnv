@@ -746,6 +746,9 @@ def fragmentFastq(inputs,output=None,split_times=100,gz=False,prefix="",threads=
         toolsOne = [splitterOne]
         toolsTwo = [splitterTwo]
        
+        print toolsOne
+        print toolsTwo
+       
         if threads > 1:
             processOne = utils.run_tools(toolsOne, input=None, output=None, name="split-1-fastq")
             processTwo = utils.run_tools(toolsTwo, input=None, output=None, name="split-2-fastq")       
