@@ -54,7 +54,8 @@ int main(int argc, char **argv){
   nmer[klen/3]=0;
 
   /*Parsing the file*/
-  while (fscanf(fasta, "@%s\n%s\n", name, seq) > 0)
+  /*while (fscanf(fasta, "@%s\n%s\n", name, seq) > 0)*/
+  while (fscanf(fasta,"@%[^\n]%s\n",name,seq) > 0)
   {
     fgets(line, 100, fasta);
     fscanf(fasta, "%s\n", qual);
