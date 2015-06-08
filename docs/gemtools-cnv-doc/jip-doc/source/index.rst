@@ -57,7 +57,7 @@ Reference masking in gaps and repeats locations. It also creates an *index* for 
 
 Creates a configuration json file for the cnv pipeline. This **JSON** file is used to manage the pipeline. **By default**, is performed the **long pipeline** (removing PCR duplicates) and assumes that input data is **paired end**. ::
 
-    createConfigurationFile.py -bwa-reference my_reference.fa -gem-index my_reference_kmer_mask_mask-fasta.gem -reference-conf my_reference_pad36_padded-fasta.conf  --json-file my_pipeline_cfg.json -- submit --dry --show
+    createConfigurationFile.py -bwa-reference my_reference.fa -gem-index my_reference_kmer_mask_mask-fasta.gem -reference-conf my_reference_pad36_padded-fasta.conf  --json-file my_pipeline_cfg.json 
 
 
 These are the main parameters:
