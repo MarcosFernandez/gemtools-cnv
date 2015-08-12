@@ -40,6 +40,8 @@ typedef struct {
   uint64_t distance;
   uint64_t gt_score;
   uint8_t phred_score;
+  uint8_t pair_score;
+  bool paired; 
   // gt_attributes* attributes; // Not needed for now
 } gt_mmap_attributes;
 typedef struct {
@@ -93,10 +95,10 @@ typedef struct {
  */
 #define GT_TEMPLATE_REDUCTION(template,reduced_alignment) \
   gt_alignment* const reduced_alignment = gt_template_get_block((template),0)
-#define GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,reduced_alignment) \
+#define GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,reduced_alignment) \
   if (gt_expect_false(gt_template_get_num_blocks((template))==1)) { \
     GT_TEMPLATE_REDUCTION(template,reduced_alignment);
-#define GT_TEMPLATE_IF_SE_ALINGMENT(template) \
+#define GT_TEMPLATE_IF_SE_ALIGNMENT(template) \
   if (gt_expect_false(gt_template_get_num_blocks((template))==1))
 #define GT_TEMPLATE_END_REDUCTION }
 #define GT_TEMPLATE_END_REDUCTION__RETURN return;}

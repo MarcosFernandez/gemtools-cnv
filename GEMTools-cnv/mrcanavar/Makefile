@@ -9,35 +9,28 @@
 ROOT_PATH=..
 include ../Makefile.mk
 
-CFLAGS = -O2 -g -Wall
+CFLAGS = -c -O2 -g -Wall
 LDFLAGS = -lz -lm
 SOURCES = mrcanavar.c utils.c prep.c sam.c callcnv.c gcnorm.c
 OBJECTS = $(SOURCES:.c=.o)
 
-GEM_TOOLS_CNV=mrcanavar
-GEM_TOOLS_CNV_BIN=$(addprefix $(FOLDER_BIN)/, $(GEM_TOOLS_CNV))
+EXECUTABLE = mrcanavar
+BIN = $(addprefix $(FOLDER_BIN)/, $(EXECUTABLE))
 
-
+all: $(SOURCES) $(EXECUTABLE)
+	rm -rf *.o
 		
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+	cp mrcanavar $(BIN)
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
 
-all: GEM_TOOLS_CNV_FLAGS= $(CFLAGS) $(ARCH_FLAGS) $(LDFLAGS)
-all: $(GEM_TOOLS_CNV_BIN)
-	
-
-static: GEM_TOOLS_CNV_FLAGS= $(CFLAGS) $(ARCH_FLAGS) $(LDFLAGS) -static
-static: $(GEM_TOOLS_CNV_BIN)
-
-debug: GEM_TOOLS_CNV_FLAGS= $(CFLAGS) $(ARCH_FLAGS) $(LDFLAGS) $(DEBUG_FLAGS)
-debug: $(GEM_TOOLS_CNV_BIN)
+clean: 
+	rm -f $(EXECUTABLE) *.o *~ \#* 
 
 
-$(GEM_TOOLS_CNV_BIN): $(GEM_TOOLS_CNV) 
-	$(CC) -o $@ $(SOURCES) $(GEM_TOOLS_CNV_FLAGS)  
 
 
 

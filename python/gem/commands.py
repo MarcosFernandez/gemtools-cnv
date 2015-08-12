@@ -8,7 +8,7 @@ import sys
 from sys import exit
 import signal
 
-__VERSION__ = "1.7.1.0.0"
+__VERSION__ = "1.8.0.0.0"
 
 
 def gemtools():

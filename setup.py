@@ -29,7 +29,7 @@ import shutil
 
 
 __VERSION_MAJOR = "1"
-__VERSION_MINOR = "7.1"
+__VERSION_MINOR = "8.0"
 __VERSION_CNV = "0.0"
 __VERSION__ = "%s.%s.%s" % (__VERSION_MAJOR, __VERSION_MINOR,__VERSION_CNV)
 __DOWNLOAD_FILE_TEMPLATE__ = "GEM-gemtools-cnv-%s-%s.tar.gz"

@@ -8,14 +8,17 @@
 #define DEFAULT_MAX_INSERT 1000
 #define MAX_INDEL_SIZE 1024
 #define DUP_LIMIT 255
+#define MISSING_QUAL 30
 
 #define PAIR_TYPE_DS 0 // Reads on different strands, same contig
 #define PAIR_TYPE_SS 1 // Reads on same strand, same contig
 #define PAIR_TYPE_MM 2 // Reads on different contigs
 
-#define BIS_C2T 0
-#define BIS_G2A 1
-#define BIS_LAMBDA 2
+#define SG_C2T 1
+#define SG_G2A 2
+#define SG_LAMBDA 3
+#define SG_PHIX174 4
+#define SG_MITO 5
 
 #define AS_INSERT_TYPE_PAIRED 0        // Paired mapping declared as valid and unique
 #define AS_INSERT_TYPE_ALL_UNIQUE 1    // All pairs of uniquely mapping single reads with consistent orientations
@@ -24,6 +27,14 @@
 
 #define PHAGE_LAMBDA "NC_001416.1"
 #define PHIX174 "NC_001422.1"
+#define PHAGE_T7 "NC_001604.1"
+#define MITO "chrM"
+
+#define CONV_EST_TYPE_PHIX174 0
+#define CONV_EST_TYPE_PHAGE_LAMBDA 1
+#define CONV_EST_TYPE_MITO 2
+#define CONV_EST_TYPE_NONCPG 3
+#define CONV_EST_N 4
 
 typedef struct {
   int64_t x;
@@ -91,7 +102,7 @@ typedef struct {
   uint64_t paired_mapped; // Number of paired reads
   uint64_t paired_unique;
   uint64_t paired_type[3]; // Strand/contig concordance 
-  uint64_t bis_stats[3]; // Bisulphite mapping counts
+  uint64_t sg_stats[6]; // Special genome counts
   uint64_t reads_with_splitmaps[3];
   uint64_t reads_only_with_splitmaps[3];
   uint64_t max_read_length[2];
@@ -103,6 +114,8 @@ typedef struct {
   uint64_t **base_counts_by_cycle[2];      // [read][cycle][qual*5+base]
   uint64_t *mm_stats[2*(MAX_QUAL+1)]; // [read*(MAX_QUAL+1)+qual][cycle]
   uint64_t *qual_stats[2*(MAX_QUAL+1)]; // [read*(MAX_QUAL+1)+qual][cycle]
+  uint64_t bs_counts[2][35];
+  uint64_t *non_cpg_cytosines[3];
   uint64_t tv_stats[2][MAX_QUAL+1];
   uint64_t ts_stats[2][MAX_QUAL+1];
   uint64_t pbc_stats[2][MAX_QUAL+1];
@@ -114,6 +127,7 @@ typedef struct {
   dist_element* insert_size; // Store insert size distribution
   loc_hash** loc_hash; // Track position and insert sizes to estimate duplicates
   bool paired;
+  bool bisulphite;
 } as_stats;
 
 typedef struct {
@@ -121,7 +135,9 @@ typedef struct {
   char *output_file;
   char *dist_file;
   char *phage_lambda;
+  char *phage_T7;
   char *phix174;
+  char *mito;
   bool mmap_input;
   gt_generic_parser_attributes *parser_attr;
   bool variable_read_length;

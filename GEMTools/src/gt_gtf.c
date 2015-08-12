@@ -639,10 +639,15 @@ GT_INLINE gt_gtf* gt_gtf_read(gt_input_file* input_file, const uint64_t threads)
   for(i=0; i<threads-1; i++){
     gtfs[i] = gt_gtf_new();
   }
-
+#ifdef HAVE_OPENMP
   #pragma omp parallel num_threads(threads)
+#endif
   {
+#ifdef HAVE_OPENMP
     uint64_t tid = omp_get_thread_num();
+#else
+	 uint64_t tid=0;
+#endif
     gt_buffered_input_file* buffered_input = gt_buffered_input_file_new(input_file);
     gt_string* buffered_line = gt_string_new(GTF_MAX_LINE_LENGTH);
     gt_gtf* thread_gtf;
@@ -1051,7 +1056,7 @@ GT_INLINE void gt_gtf_count_coverage_(const gt_gtf* const gtf, gt_map* const map
       uint64_t start_bucket = (((rel_start/(double)exon_length) * 100.0) + 0.5) - 1;
       uint64_t end_bucket = (((rel_end/(double)exon_length) * 100.0) + 0.5) - 1;
       uint64_t s = 0;
-      if(start_bucket >= 0 && start_bucket < 100 && end_bucket >= start_bucket && end_bucket < 100){
+      if(start_bucket < 100 && end_bucket >= start_bucket && end_bucket < 100){
         // handle reverse strand and flip coordinates
         if(hit->strand == REVERSE){
           uint64_t tmp = start_bucket;
@@ -1073,7 +1078,7 @@ GT_INLINE void gt_gtf_count_coverage_(const gt_gtf* const gtf, gt_map* const map
         start_bucket = (scale * (double)start_bucket) + trans_start_bucket;
         end_bucket = (scale * (double)end_bucket) + trans_start_bucket;
 
-        if(start_bucket >= 0 && start_bucket < 100 && end_bucket >= start_bucket && end_bucket < 100){
+        if(start_bucket < 100 && end_bucket >= start_bucket && end_bucket < 100){
           for(s=start_bucket;s<=end_bucket; s++){
             //fprintf(stderr, ">>>GLOBAL COUNT %s : %"PRIu64" S/E: %"PRIu64" %"PRIu64" (%"PRIu64") Exon: %"PRIu64" %"PRIu64"\n", transcript->transcript_id->buffer, s, start, end, map_length, hit->start, hit->end);
             // count gene body coverage
@@ -1511,7 +1516,7 @@ GT_INLINE uint64_t gt_gtf_count_map(const gt_gtf* const gtf, gt_map* const map1,
     }GT_SHASH_END_ITERATE;
   }
 
-  if(params->single_transcript_coverage != NULL){
+  if(params != NULL && params->single_transcript_coverage != NULL){
     // do coverage counts for merged genes
     GT_SHASH_BEGIN_KEY_ITERATE(local_gene_counts, key){
       // count map1
@@ -1582,7 +1587,7 @@ GT_INLINE void gt_gtf_search_alignment(const gt_gtf* const gtf, gt_vector* const
 }
 
 GT_INLINE void gt_gtf_search_template(const gt_gtf* const gtf, gt_vector* const hits, gt_template* const template){
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template, alignment){
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template, alignment){
     gt_gtf_search_alignment(gtf,hits, alignment);
   }GT_TEMPLATE_END_REDUCTION__RETURN;
   gt_gtf_search_alignment(gtf,hits, gt_template_get_block(template, 0));

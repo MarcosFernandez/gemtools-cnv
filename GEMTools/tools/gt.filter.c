@@ -251,7 +251,7 @@ gt_filter_args parameters = {
  * mapped pairs
  */
 GT_INLINE uint64_t gt_filter_get_num_maps(gt_template* template){
-  GT_TEMPLATE_IF_SE_ALINGMENT(template) {
+  GT_TEMPLATE_IF_SE_ALIGNMENT(template) {
     return gt_template_get_num_mmaps(template);
   } else {
     if (!gt_template_is_mapped(template)) {
@@ -389,7 +389,7 @@ GT_INLINE uint64_t gt_filter_count_junctions_in_region(gt_map* const map,const u
   return count;
 }
 GT_INLINE bool gt_filter_are_overlapping_pairs_coherent(gt_map** const mmap) {
-  if (!gt_map_has_next_block(mmap[0]) && !gt_map_has_next_block(mmap[1])) return true;
+  if ((mmap[0] == NULL || mmap[1] == NULL) || (!gt_map_has_next_block(mmap[0]) && !gt_map_has_next_block(mmap[1]))) return true;
 
   // Check overlap
   uint64_t overlap_start, overlap_end;
@@ -460,7 +460,7 @@ GT_INLINE bool gt_filter_make_reduce_by_annotation_alignment(gt_template* const 
 
 GT_INLINE bool gt_filter_make_reduce_by_annotation(gt_template* const template_dst,gt_template* const template_src) {
   bool filtered = false;
-  GT_TEMPLATE_IF_SE_ALINGMENT(template_src) {
+  GT_TEMPLATE_IF_SE_ALIGNMENT(template_src) {
     GT_TEMPLATE_REDUCTION(template_src,alignment_src);
     gt_gtf_hits* hits = gt_gtf_hits_new();
     filtered = gt_filter_make_reduce_by_annotation_alignment(template_dst, alignment_src, 0, hits);
@@ -607,7 +607,7 @@ void gt_alignment_dna_filter(gt_alignment* const alignment_dst,gt_alignment* con
   }
 }
 void gt_template_reduction_filter(gt_template* const template_dst,gt_template* const template_src,const gt_file_format file_format) {
-  GT_TEMPLATE_IF_SE_ALINGMENT(template_src) {
+  GT_TEMPLATE_IF_SE_ALIGNMENT(template_src) {
     GT_TEMPLATE_REDUCTION(template_src,alignment_src);
     GT_TEMPLATE_REDUCTION(template_dst,alignment_dst);
     gt_alignment_reduction_filter(alignment_dst,alignment_src,file_format);
@@ -644,7 +644,7 @@ void gt_template_dna_filter(gt_template* const template_dst,gt_template* const t
    *   (3) Reduction of all maps (taking them into account as a whole)
    *   (4) Post-filtering steps
    */
-  GT_TEMPLATE_IF_SE_ALINGMENT(template_src) {
+  GT_TEMPLATE_IF_SE_ALIGNMENT(template_src) {
     GT_TEMPLATE_REDUCTION(template_src,alignment_src);
     GT_TEMPLATE_REDUCTION(template_dst,alignment_dst);
     gt_alignment_dna_filter(alignment_dst,alignment_src,file_format);
@@ -787,7 +787,7 @@ void gt_alignment_rna_filter(gt_alignment* const alignment_dst,gt_alignment* con
 }
 
 void gt_template_rna_filter(gt_template* const template_dst,gt_template* const template_src,const gt_file_format file_format) {
-  GT_TEMPLATE_IF_SE_ALINGMENT(template_src) {
+  GT_TEMPLATE_IF_SE_ALIGNMENT(template_src) {
     GT_TEMPLATE_REDUCTION(template_src,alignment_src);
     GT_TEMPLATE_REDUCTION(template_dst,alignment_dst);
     /*
@@ -809,14 +809,14 @@ void gt_template_rna_filter(gt_template* const template_dst,gt_template* const t
         // Check SM contained and get minimum intron length
         uint64_t has_sm = false;
         uint64_t min_intron_length = UINT64_MAX, min_block_length = UINT64_MAX;
-        if (parameters.no_split_maps || parameters.only_split_maps || parameters.min_intron_length >= 0) {
+        if (parameters.no_split_maps || parameters.only_split_maps || parameters.min_intron_length != UINT64_MAX) {
           GT_MMAP_ITERATE(mmap,map,end_p) {
             if (gt_map_get_num_blocks(map) > 1) {
               const uint64_t mil = gt_map_get_min_intron_length(map);
               const uint64_t mbl = gt_map_get_min_block_length(map);
               has_sm = true;
-              if (mil >= 0 && mil < min_intron_length) min_intron_length = mil;
-              if (mbl >= 0 && mbl < min_block_length) min_block_length = mbl;
+              if (mil != UINT64_MAX && mil < min_intron_length) min_intron_length = mil;
+              if (mbl != UINT64_MAX && mbl < min_block_length) min_block_length = mbl;
             }
           }
         }
@@ -950,7 +950,7 @@ GT_INLINE bool gt_filter_apply_filters(
     gt_template *template_filtered = gt_template_dup(template,false,false);
     const uint64_t num_blocks = gt_template_get_num_blocks(template);
     GT_TEMPLATE_ITERATE_MMAP__ATTR_(template,mmap,mmap_attributes) {
-      if (!gt_filter_are_overlapping_pairs_coherent(mmap))continue;
+      if (mmap[0] == NULL || mmap[1] == NULL || !gt_filter_are_overlapping_pairs_coherent(mmap))continue;
       gt_map** mmap_copy = gt_mmap_array_copy(mmap,num_blocks);
       gt_template_insert_mmap(template_filtered,mmap_copy,mmap_attributes, parameters.check_duplicates);
       free(mmap_copy);

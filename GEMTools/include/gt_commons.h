@@ -12,7 +12,7 @@
 /*
  * VERSION
  */
-#define GT_VERSION "1.7.1"
+#define GT_VERSION "1.8"
 #define GT_GIT_URL "https://github.com/gemtools/gemtools"
 
 /*
@@ -125,7 +125,11 @@
 #define gt_expect_false(condition) __builtin_expect(condition,0)
 
 // GemTools Inline
+#ifdef USE_INLINE
 #define GT_INLINE inline
+#else
+#define GT_INLINE
+#endif
 
 // Macro Stringify
 #define GT_QUOTE(value) #value
@@ -140,6 +144,9 @@
 #define gt_is_hex_digit(character) (gt_is_number(character) || ('a' <= (character) && (character) <= 'f') || ('A' <= (character) && (character) <= 'F'))
 #define gt_is_letter(character) (('a' <= (character) && (character) <= 'z') || ('A' <= (character) && (character) <= 'Z'))
 #define gt_is_alphanumeric(character) (gt_is_number(character) || gt_is_letter(character))
+
+#define gt_is_end_of_record(character) ( (character)==EOL || (character)==EOS )
+#define gt_is_end_of_field(character) ( gt_is_end_of_record(character) || (character)==SPACE || (character)==TAB )
 
 #define gt_get_cipher(character) ((character) - '0')
 #define gt_get_hex_cipher(character) (gt_is_number(character)?gt_get_cipher(character):(toupper(character) - 'A' + 10))

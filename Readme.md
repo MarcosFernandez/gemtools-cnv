@@ -68,8 +68,8 @@ i3 bundle. Otherwise use core2.
 
 The latest release can be downloaded here:
 
-* [GEM-Tools-cnv static binary bundle 1.7.1.0.0 for i3](http://statgen.cnag.cat/gemtools/releases/GEMTools-cnv-static-i3-1.7.1.0.0.tar.gz)
-* [GEM-Tools-cnv static binary bundle 1.7.1.0.0 for core2](http://statgen.cnag.cat/gemtools/releases/GEMTools-cnv-static-core2-1.7.1.0.0.tar.gz)
+* [GEM-Tools-cnv static binary bundle 1.8.0.0.0 for i3](http://statgen.cnag.cat/gemtools/releases/GEMTools-cnv-static-i3-1.8.0.0.0.tar.gz)
+* [GEM-Tools-cnv static binary bundle 1.8.0.0.0 for core2](http://statgen.cnag.cat/gemtools/releases/GEMTools-cnv-static-core2-1.8.0.0.0.tar.gz)
 
 Library distribution
 --------------------
@@ -221,6 +221,10 @@ the [GEM bugtracker](http://algorithms.cnag.cat/mantis).
 
 Change log
 =====================
+    1.8.0.0.0
+    - Adopted GEMTOOLS 1.8 C code version. Which includes new gt.scorereads abailable for transforming MAP to SAM.
+    - Fixed Makefile issue related to mrcanavar compilation.
+
     1.7.1.0.0
     - gemtools cnv version 0.0 based on gemtools 1.7.1
     - cnv-assembly-preparation Tools for masking the assembly to perform copy number calls

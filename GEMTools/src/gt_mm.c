@@ -34,7 +34,11 @@
 #endif
 
 #ifndef MAP_ANONYMOUS
+#ifdef MAP_ANON
+  #define MAP_ANONYMOUS MAP_ANON
+#else
   #define MAP_ANONYMOUS 0 // TODO: disable for mac compatibility
+#endif
 #endif
 
 #ifndef MAP_POPULATE

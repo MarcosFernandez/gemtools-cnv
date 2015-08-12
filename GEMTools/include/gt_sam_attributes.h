@@ -20,10 +20,13 @@
 /*
  * Checkers
  */
+
+#define GT_SAM_HEADER_RECORD_CHECK(sam_header_record) GT_HASH_CHECK((gt_shash*)(sam_header_record))
+
 #define GT_SAM_HEADERS_CHECK(sam_headers) \
-  GT_STRING_CHECK(sam_headers->header); \
   GT_VECTOR_CHECK(sam_headers->read_group); \
   GT_VECTOR_CHECK(sam_headers->program); \
+  GT_VECTOR_CHECK(sam_headers->sequence_dictionary); \
   GT_VECTOR_CHECK(sam_headers->comments)
 
 /*
@@ -40,32 +43,49 @@
 #define GT_SAM_FLAG_SECONDARY_ALIGNMENT 0x100
 #define GT_SAM_FLAG_NOT_PASSING_QC 0x200
 #define GT_SAM_FLAG_PCR_OR_OPTICAL_DUPLICATE 0x400
+#define GT_SAM_FLAG_SUPPLEMENTARY_ALIGNMENT 0x800
+
 /*
  * SAM File specifics Attribute (SAM Headers)
  */
 #define GT_SAM_HEADER_OK   0
 #define GT_SAM_HEADER_TAG_INVALID   (-1)
 #define GT_SAM_HEADER_VALUE_INVALID (-2)
+
+typedef gt_shash gt_sam_header_record; // (gt_sam_header_tag*)
+
 typedef struct {
-  gt_string* header; // @HD
-  gt_sequence_archive* sequence_archive; // @SQ
-  gt_vector* read_group; /* // @RG (gt_string*) */
-  gt_vector* program; // @PG /* (gt_string*) */
-  gt_vector* comments; // @ CO /* (gt_string*) */
+	gt_sam_header_record *header; // @HD
+	gt_vector* sequence_dictionary; // @SQ (gt_sam_header_record*)
+	gt_vector* read_group; // @RG (gt_sam_header_record*)
+	gt_vector* program; // @PG (gt_sam_header_record*)
+	gt_vector* comments; // @CO (gt_string*)
+	gt_shash* sequence_dictionary_sn_hash; // SN tags of SQ records
+	gt_shash* read_group_id_hash; // ID tags of RG records
+	gt_shash* program_id_hash; // ID tags of PG records
 } gt_sam_headers; // SAM Headers
+
+GT_INLINE gt_sam_header_record* gt_sam_header_record_new(void);
+GT_INLINE void gt_sam_header_record_clear(gt_sam_header_record* const header_record);
+GT_INLINE void gt_sam_header_record_delete(gt_sam_header_record* const header_record);
+GT_INLINE gt_string *gt_sam_header_record_get_tag(gt_sam_header_record *const header_record,char* const tag);
+GT_INLINE void gt_sam_header_record_add_tag(gt_sam_header_record* const header_record,char* const tag,gt_string* string);
+GT_INLINE void gt_sam_header_gprint_header_record(gt_generic_printer* const gprinter,gt_sam_header_record* const header_record,char* const tag);
 
 GT_INLINE gt_sam_headers* gt_sam_header_new(void);
 GT_INLINE void gt_sam_header_clear(gt_sam_headers* const sam_headers);
 GT_INLINE void gt_sam_header_delete(gt_sam_headers* const sam_headers);
 
-GT_INLINE void gt_sam_header_set_sequence_archive(gt_sam_headers* const sam_headers,gt_sequence_archive* const sequence_archive);
-GT_INLINE void gt_sam_header_set_header_record(gt_sam_headers* const sam_headers,gt_string* const header_line);
-GT_INLINE void gt_sam_header_add_read_group_record(gt_sam_headers* const sam_headers,gt_string* const read_group_record);
-GT_INLINE void gt_sam_header_add_program_record(gt_sam_headers* const sam_headers,gt_string* const program_record);
+GT_INLINE void gt_sam_header_add_sequence_record(gt_sam_headers* const sam_headers,gt_sam_header_record* const header_record);
+GT_INLINE void gt_sam_header_set_header_record(gt_sam_headers* const sam_headers,gt_sam_header_record* const header_record);
+GT_INLINE void gt_sam_header_add_read_group_record(gt_sam_headers* const sam_headers,gt_sam_header_record* const header_record);
+GT_INLINE void gt_sam_header_add_program_record(gt_sam_headers* const sam_headers,gt_sam_header_record* const header_record);
 GT_INLINE void gt_sam_header_add_comment(gt_sam_headers* const sam_headers,gt_string* const comment);
+GT_INLINE void gt_sam_header_load_sequence_archive(gt_sam_headers* const sam_headers,gt_sequence_archive *sequence_archive);
+
 /*
  * SAM Optional Fields
- *   - SAM Attributes(optional fields) are just a vector of @gt_sam_attribute
+ *   - SAM Attributes(optional fields) are just a hash of @gt_sam_attribute
  *     embedded into the general attributes(@gt_shash) of any object(@template,@alignment,@map,...)
  */
 typedef enum { SAM_ATTR_INT_VALUE, SAM_ATTR_FLOAT_VALUE, SAM_ATTR_STRING_VALUE,
@@ -111,6 +131,16 @@ typedef struct {
     gt_status (*s_func)(gt_sam_attribute_func_params*);
   };
 } gt_sam_attribute;
+
+typedef struct {
+	char tag[2];
+	bool active;
+	void (*add_tag_func)(gt_sam_attributes* const);
+} gt_sam_attribute_option;
+
+#define GT_SAM_ATTRIBUTES_TAG(sam_tag,default_state) {.tag = #sam_tag, .active = default_state, .add_tag_func = gt_sam_attributes_add_tag_##sam_tag}
+#define GT_SAM_ATTRIBUTES_NULL_TAG {.tag = {0,0}, .active = false, .add_tag_func = NULL}
+
 /*
  * SAM Optional Fields
  *   - SAM Attributes(optional fields) are just a hash of @gt_sam_attribute
@@ -140,21 +170,21 @@ GT_INLINE gt_sam_attribute* gt_attributes_get_sam_attribute(gt_attributes* const
 /*
  * SAM Attribute Setup
  */
-GT_INLINE void gt_sam_attribute_set_ivalue(gt_sam_attribute* const sam_attribute,char* const tag,char type_id,const int32_t value);
-GT_INLINE void gt_sam_attribute_set_fvalue(gt_sam_attribute* const sam_attribute,char* const tag,char type_id,const float value);
-GT_INLINE void gt_sam_attribute_set_svalue(gt_sam_attribute* const sam_attribute,char* const tag,char type_id,gt_string* const string);
-GT_INLINE void gt_sam_attribute_set_ifunc(gt_sam_attribute* const sam_attribute,char* const tag,char type_id,gt_status (*i_func)(gt_sam_attribute_func_params*));
-GT_INLINE void gt_sam_attribute_set_ffunc(gt_sam_attribute* const sam_attribute,char* const tag,char type_id,gt_status (*f_func)(gt_sam_attribute_func_params*));
-GT_INLINE void gt_sam_attribute_set_sfunc(gt_sam_attribute* const sam_attribute,char* const tag,char type_id,gt_status (*s_func)(gt_sam_attribute_func_params*));
+GT_INLINE void gt_sam_attribute_set_ivalue(gt_sam_attribute* const sam_attribute,const char* const tag,const char type_id,const int32_t value);
+GT_INLINE void gt_sam_attribute_set_fvalue(gt_sam_attribute* const sam_attribute,const char* const tag,const char type_id,const float value);
+GT_INLINE void gt_sam_attribute_set_svalue(gt_sam_attribute* const sam_attribute,const char* const tag,const char type_id,gt_string* const string);
+GT_INLINE void gt_sam_attribute_set_ifunc(gt_sam_attribute* const sam_attribute,const char* const tag,const char type_id,gt_status (*i_func)(gt_sam_attribute_func_params*));
+GT_INLINE void gt_sam_attribute_set_ffunc(gt_sam_attribute* const sam_attribute,const char* const tag,const char type_id,gt_status (*f_func)(gt_sam_attribute_func_params*));
+GT_INLINE void gt_sam_attribute_set_sfunc(gt_sam_attribute* const sam_attribute,const char* const tag,const char type_id,gt_status (*s_func)(gt_sam_attribute_func_params*));
 /*
  * SAM Attributes Add
  */
-GT_INLINE void gt_sam_attributes_add_ivalue(gt_sam_attributes* const sam_attributes,char* const tag,char type_id,const int32_t value);
-GT_INLINE void gt_sam_attributes_add_fvalue(gt_sam_attributes* const sam_attributes,char* const tag,char type_id,const float value);
-GT_INLINE void gt_sam_attributes_add_svalue(gt_sam_attributes* const sam_attributes,char* const tag,char type_id,gt_string* const string);
-GT_INLINE void gt_sam_attributes_add_ifunc(gt_sam_attributes* const sam_attributes,char* const tag,char type_id,gt_status (*i_func)(gt_sam_attribute_func_params*));
-GT_INLINE void gt_sam_attributes_add_ffunc(gt_sam_attributes* const sam_attributes,char* const tag,char type_id,gt_status (*f_func)(gt_sam_attribute_func_params*));
-GT_INLINE void gt_sam_attributes_add_sfunc(gt_sam_attributes* const sam_attributes,char* const tag,char type_id,gt_status (*s_func)(gt_sam_attribute_func_params*));
+GT_INLINE void gt_sam_attributes_add_ivalue(gt_sam_attributes* const sam_attributes,const char* const tag,const char type_id,const int32_t value);
+GT_INLINE void gt_sam_attributes_add_fvalue(gt_sam_attributes* const sam_attributes,const char* const tag,const char type_id,const float value);
+GT_INLINE void gt_sam_attributes_add_svalue(gt_sam_attributes* const sam_attributes,const char* const tag,const char type_id,gt_string* const string);
+GT_INLINE void gt_sam_attributes_add_ifunc(gt_sam_attributes* const sam_attributes,const char* const tag,const char type_id,gt_status (*i_func)(gt_sam_attribute_func_params*));
+GT_INLINE void gt_sam_attributes_add_ffunc(gt_sam_attributes* const sam_attributes,const char* const tag,const char type_id,gt_status (*f_func)(gt_sam_attribute_func_params*));
+GT_INLINE void gt_sam_attributes_add_sfunc(gt_sam_attributes* const sam_attributes,const char* const tag,const char type_id,gt_status (*s_func)(gt_sam_attribute_func_params*));
 /*
  * Functional Attribute (ifunc,ffunc,sfunc,pfunc) parameters
  */
@@ -175,6 +205,10 @@ GT_INLINE void gt_sam_attribute_func_params_set_pe(
     gt_sam_attribute_func_params* const func_params,gt_template* const template,
     uint64_t paired_end_position,gt_map* const map,gt_map* const mate,gt_mmap_attributes* const mmap_attributes);
 
+GT_INLINE gt_status gt_sam_attributes_parse_tag_option_string(gt_sam_attribute_option *options,char *p);
+GT_INLINE void gt_sam_attributes_add_tag_options(gt_sam_attribute_option* const options,gt_sam_attributes* const sam_attributes);
+
+
 /*
  * Functional Internal Data
  *   Storage for calculation to do once for all template/alignmet/map SAM output
@@ -189,7 +223,7 @@ GT_INLINE void gt_sam_attribute_func_params_set_pe(
 //  AM  i  The smallest template-independent mapping quality of segments in the rest // FIXME
 
 //  AS  i  Alignment score generated by aligner
-// TODO
+GT_INLINE void gt_sam_attributes_add_tag_AS(gt_sam_attributes* const sam_attributes);
 
 //  BC  Z  Barcode sequence
 //  BQ  Z  Offset to base alignment quality (BAQ), of the same length as the read sequence.
@@ -204,6 +238,8 @@ GT_INLINE void gt_sam_attribute_func_params_set_pe(
 //  FS  Z  Segment suffix.
 //  FZ  B,S Flow signal intensities on the original strand of the read, stored as (uint16 t) round(value * 100.0).
 //  LB  Z  Library. Value to be consistent with the header RG-LB tag if @RG is present.
+GT_INLINE void gt_sam_attributes_add_tag_LB(gt_sam_attributes* const sam_attributes,gt_string* const library);
+
 //  H0  i  Number of perfect hits
 //  H1  i  Number of 1-difference hits (see also NM)
 //  H2  i  Number of 2-difference hits
@@ -212,6 +248,9 @@ GT_INLINE void gt_sam_attribute_func_params_set_pe(
 //  MD  Z  String for mismatching positions. Regex : [0-9]+(([A-Z]|\^[A-Z]+)[0-9]+)*
 //  MQ  i  Mapping quality of the mate/next segment
 GT_INLINE void gt_sam_attributes_add_tag_MQ(gt_sam_attributes* const sam_attributes);
+
+//  SQ  i  Single end mapping quality of segment
+GT_INLINE void gt_sam_attributes_add_tag_SQ(gt_sam_attributes* const sam_attributes);
 
 //  NH  i  Number of reported alignments that contains the query in the current record
 GT_INLINE void gt_sam_attributes_add_tag_NH(gt_sam_attributes* const sam_attributes);
@@ -238,6 +277,12 @@ GT_INLINE void gt_sam_attributes_add_tag_RG(gt_sam_attributes* const sam_attribu
 //  UQ  i  Phred likelihood of the segment, conditional on the mapping being correct
 GT_INLINE void gt_sam_attributes_add_tag_UQ(gt_sam_attributes* const sam_attributes);
 
+//  TQ  i  Custom tag - equivalent to MAPQ score for a template
+GT_INLINE void gt_sam_attributes_add_tag_TQ(gt_sam_attributes* const sam_attributes);
+
+//  TP  i  Custom tag - as TQ but comparing to all possible pairings of mappings (not taking account of orientation, contig location or interval size)
+GT_INLINE void gt_sam_attributes_add_tag_TP(gt_sam_attributes* const sam_attributes);
+
 /*
  * GT-library PRE-Implemented Functional Attributes
  *   X?  ?  Reserved fields for end users (together with Y? and Z?)
@@ -259,6 +304,16 @@ GT_INLINE void gt_sam_attributes_add_tag_UQ(gt_sam_attributes* const sam_attribu
  */
 GT_INLINE void gt_sam_attributes_add_tag_XT(gt_sam_attributes* const sam_attributes);
 
+/* Similar to XT, but for a template */
+GT_INLINE void gt_sam_attributes_add_tag_xp(gt_sam_attributes* const sam_attributes);
+
+/* Gives conversion type for bisulfite reads:
+ * XB:A:U => non_converted
+ * XB:A:C => C2T strand
+ * XB:A:G => G2A strand
+ */
+GT_INLINE void gt_sam_attributes_add_tag_XB(gt_sam_attributes* const sam_attributes);
+
 /*
  *  XA  Z  Alternative hits; format: (chr,pos,CIGAR,NM;)*
  *    => Implemented by means of setting ...
@@ -276,5 +331,9 @@ GT_INLINE void gt_sam_attributes_add_tag_cs(gt_sam_attributes* const sam_attribu
 GT_INLINE void gt_sam_attributes_add_tag_md(gt_sam_attributes* const sam_attributes);
 //  XS  A  XS directionality information
 GT_INLINE void gt_sam_attributes_add_tag_XS(gt_sam_attributes* const sam_attributes);
+//  SA  Z  Supplementary alignment information for chimeric alignments
+GT_INLINE void gt_sam_attributes_add_tag_SA(gt_sam_attributes* const sam_attributes);
+//  MD  Z  Mismatch information (complementary to CIGAR string)
+GT_INLINE void gt_sam_attributes_add_tag_MD(gt_sam_attributes* const sam_attributes);
 
 #endif /* GT_SAM_DATA_ATTRIBUTES_H_ */

@@ -96,7 +96,7 @@ GT_INLINE gt_status gt_output_map_gprint_template_tag(
     gt_generic_printer* const gprinter,gt_template* const template) {
   GT_GENERIC_PRINTER_CHECK(gprinter);
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_output_map_gprint_alignment_tag(gprinter,alignment);
   } GT_TEMPLATE_END_REDUCTION;
   gt_output_map_attributes output_map_attributes = GT_OUTPUT_MAP_ATTR_DEFAULT();
@@ -240,13 +240,13 @@ GT_INLINE gt_status gt_output_map_gprint_map_(
         cigar_pending = true;
         switch (junction) {
           case SPLICE:
-            gt_gprintf(gprinter,">""%"PRIu64"*",gt_map_get_junction_size(map_it));
+            gt_gprintf(gprinter,">""%"PRId64"*",gt_map_get_junction_size(map_it));
             break;
           case POSITIVE_SKIP:
-            gt_gprintf(gprinter,">""%"PRIu64"+",gt_map_get_junction_size(map_it));
+            gt_gprintf(gprinter,">""%"PRId64"+",gt_map_get_junction_size(map_it));
             break;
           case NEGATIVE_SKIP:
-            gt_gprintf(gprinter,">""%"PRIu64"-",gt_map_get_junction_size(map_it));
+            gt_gprintf(gprinter,">""%"PRId64"-",gt_map_get_junction_size(map_it));
             break;
           case NO_JUNCTION:
           default:
@@ -479,7 +479,7 @@ GT_INLINE gt_status gt_output_map_gprint_template_maps(
   GT_NULL_CHECK(gprinter);
   GT_TEMPLATE_CHECK(template);
   GT_OUTPUT_MAP_CHECK_ATTRIBUTES(output_map_attributes);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_output_map_gprint_alignment_maps(gprinter,alignment,output_map_attributes);
   } GT_TEMPLATE_END_REDUCTION;
   gt_status error_code = 0;
@@ -490,32 +490,39 @@ GT_INLINE gt_status gt_output_map_gprint_template_maps(
     uint64_t strata = 0, pending_maps = 0, total_maps_printed = 0;
     while (gt_template_get_next_matching_strata(template,strata,&strata,&pending_maps)) {
       GT_TEMPLATE_ITERATE_MMAP__ATTR(template,map_array,map_array_attr) {
-        if (map_array_attr->distance!=strata) continue;
-        // Print mmap
-        --pending_maps;
-        if ((total_maps_printed++)>0) gt_gprintf(gprinter,GT_MAP_NEXT_S);
-        GT_MMAP_ITERATE(map_array,map,end_position) {
-          if (end_position>0) gt_gprintf(gprinter,GT_MAP_TEMPLATE_SEP);
-          if (map!=NULL) error_code|=gt_output_map_gprint_map_(gprinter,map,output_map_attributes,false,true,true);
-        }
-        // Print scores
-        if (output_map_attributes->print_scores && map_array_attr!=NULL && map_array_attr->gt_score!=GT_MAP_NO_GT_SCORE) {
-        	if(output_map_attributes->hex_print_scores)
-            gt_gprintf(gprinter,GT_MAP_TEMPLATE_SCORE"0x%"PRIx64,map_array_attr->gt_score);
-        	else gt_gprintf(gprinter,GT_MAP_TEMPLATE_SCORE"%"PRIu64,map_array_attr->gt_score);
-        }
-        if (total_maps_printed>=output_map_attributes->max_printable_maps || total_maps_printed>=num_maps) return error_code;
-        if (pending_maps==0) break;
+      	if (map_array_attr->distance!=strata) continue;
+      	// Print mmap
+      	--pending_maps;
+      	if ((total_maps_printed++)>0) gt_gprintf(gprinter,GT_MAP_NEXT_S);
+      	GT_MMAP_ITERATE(map_array,map,end_position) {
+      		if (end_position>0) gt_gprintf(gprinter,GT_MAP_TEMPLATE_SEP);
+      		if (map!=NULL) error_code|=gt_output_map_gprint_map_(gprinter,map,output_map_attributes,false,true,true);
+      	}
+      	// Print scores
+      	if (output_map_attributes->print_scores && map_array_attr!=NULL && map_array_attr->gt_score!=GT_MAP_NO_GT_SCORE) {
+      		if(output_map_attributes->hex_print_scores)
+      			gt_gprintf(gprinter,GT_MAP_TEMPLATE_SCORE"0x%"PRIx64,map_array_attr->gt_score);
+      		else gt_gprintf(gprinter,GT_MAP_TEMPLATE_SCORE"%"PRIu64,map_array_attr->gt_score);
+      	}
+      	if (total_maps_printed>=output_map_attributes->max_printable_maps || total_maps_printed>=num_maps) return error_code;
+      	if (pending_maps==0) break;
       }
       if (pending_maps>0) {
-        gt_error(TEMPLATE_INCONSISTENT_COUNTERS);
-        return GT_MOE_INCONSISTENT_COUNTERS;
+      	gt_error(TEMPLATE_INCONSISTENT_COUNTERS);
+      	return GT_MOE_INCONSISTENT_COUNTERS;
       }
       ++strata;
     }
+    if(!total_maps_printed && num_maps==1) {
+    	gt_mmap* const mmap_ph = gt_vector_get_elm(template->mmaps,0,gt_mmap);
+    	if(!(mmap_ph->mmap[0] && mmap_ph->mmap[1])) {
+    		gt_gprintf(gprinter,GT_MAP_NONE_S);
+    		return error_code;
+    	}
+    }
     if (gt_expect_false(total_maps_printed!=num_maps)) {
-      gt_error(TEMPLATE_INCONSISTENT_COUNTERS);
-      return GT_MOE_INCONSISTENT_COUNTERS;
+    	gt_error(TEMPLATE_INCONSISTENT_COUNTERS);
+    	return GT_MOE_INCONSISTENT_COUNTERS;
     }
   }
   return error_code;
@@ -564,7 +571,7 @@ GT_INLINE gt_status gt_output_map_gprint_template(
   GT_GENERIC_PRINTER_CHECK(gprinter);
   GT_TEMPLATE_CHECK(template);
   GT_NULL_CHECK(output_map_attributes);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_output_map_gprint_alignment(gprinter,alignment,output_map_attributes);
   } GT_TEMPLATE_END_REDUCTION;
   gt_status error_code = 0;
@@ -647,7 +654,7 @@ GT_INLINE gt_status gt_output_map_gprint_gem_template(
 //    gt_generic_printer* const gprinter,gt_template* const template,gt_output_map_attributes* const output_map_attributes) {
 //  GT_GENERIC_PRINTER_CHECK(gprinter);
 //  GT_TEMPLATE_CHECK(template);
-//  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+//  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
 //    return gt_output_map_gprint_alignment(gprinter,alignment,output_map_attributes);
 //  } GT_TEMPLATE_END_REDUCTION;
 //  gt_status error_code = 0;

@@ -14,6 +14,8 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
+#include "gt_commons.h"
+
 // Internally to Gem-tools error codes are returned as gt_status
 typedef int32_t gt_status;
 
@@ -34,17 +36,17 @@ extern bool mute_error_stream;
 extern bool mute_report_stream;
 // Getters/Setters ELD-streams
 #define GT_DEFAULT_REPORT_STREAM stderr
-inline FILE* gt_error_get_stream();
-inline void gt_error_set_stream(FILE* const stream);
-inline FILE* gt_log_get_stream();
-inline void gt_log_set_stream(FILE* const stream);
-inline FILE* gt_debug_get_stream();
-inline void gt_debug_set_stream(FILE* const stream);
+GT_INLINE FILE* gt_error_get_stream();
+GT_INLINE void gt_error_set_stream(FILE* const stream);
+GT_INLINE FILE* gt_log_get_stream();
+GT_INLINE void gt_log_set_stream(FILE* const stream);
+GT_INLINE FILE* gt_debug_get_stream();
+GT_INLINE void gt_debug_set_stream(FILE* const stream);
 // Mute/Articulate ELD-streams
-inline void gt_mute_error_stream();
-inline void gt_mute_report_stream();
-inline void gt_articulate_error_stream();
-inline void gt_articulate_report_stream();
+GT_INLINE void gt_mute_error_stream();
+GT_INLINE void gt_mute_report_stream();
+GT_INLINE void gt_articulate_error_stream();
+GT_INLINE void gt_articulate_report_stream();
 
 // Labels
 #define GT_LABEL_ERROR "Error"
@@ -292,6 +294,10 @@ gt_status gt_tprintf(const char* format,...);
 #define GT_ERROR_SYS_COND_VAR_DESTROY "Conditional variable destroy call error"
 #define GT_ERROR_SYS_MKSTEMP "Could not create a temporal file (mkstemp:'%s')"
 #define GT_ERROR_SYS_HANDLE_TMP "Failed to handle temporal file"
+#define GT_ERROR_SYS_OPEN_PIPE "Failed to open pipe"
+#define GT_ERROR_SYS_CLOSE_PIPE "Failed to close pipe"
+#define GT_ERROR_SYS_FORK "Failed to fork"
+#define GT_ERROR_SYS_EXEC "Failed to exec %s %s"
 
 // String errors
 #define GT_ERROR_STRING_STATIC "Could not perform operation on static string"
@@ -310,6 +316,12 @@ gt_status gt_tprintf(const char* format,...);
 #define GT_ERROR_FILE_BZIP2_OPEN "Could not open BZIPPED file '%s'"
 #define GT_ERROR_FILE_BZIP2_NO_BZLIB "Could not open BZIPPED file '%s': no bzlib support compiled in"
 #define GT_ERROR_FILE_FDOPEN "Could not fdopen file descriptor"
+
+// Pipe errors
+#define GT_ERROR_PIPE_BAD_PIPE "Invalid pipe command: '%s'"
+#define GT_ERROR_PIPE_BIDIRECTIONAL_PIPE "Can not use bidirectional pipes: '%s'"
+#define GT_ERROR_PIPE_NOT_READ "Pipe is not for reading: '%s'"
+#define GT_ERROR_PIPE_NOT_WRITE "Pipe is not for writing: '%s'"
 
 // Output errors
 #define GT_ERROR_FPRINTF "Printing output. 'fprintf' call failed"
@@ -332,6 +344,7 @@ gt_status gt_tprintf(const char* format,...);
 #define GT_ERROR_ALIGNMENT_READ_QUAL_LENGTH "Read and quality length differs"
 #define GT_ERROR_ALIGNMENT_MAPS_NOT_PARSED "Alignment's maps not parsed yet"
 #define GT_ERROR_ALIGNMENT_INCONSISTENT_COUNTERS "Alignment inconsistency. Maps inconsistent with counters values"
+#define GT_ERROR_ALIGNMENT_NOT_SCORED "Alignments have no valid score.  MAPQ can not be calculated unless the map file has been processed using score_reads"
 #define GT_ERROR_TEMPLATE_ZERO_BLOCKS "Zero alignment blocks (num_blocks_template==0)"
 #define GT_ERROR_TEMPLATE_TOO_MANY_BLOCKS "Template contains already two ends"
 #define GT_ERROR_TEMPLATE_BLOCKS_EXCESS "Template blocks exceeds two ends"
@@ -402,6 +415,9 @@ gt_status gt_tprintf(const char* format,...);
  */
 // ISP (Input SAM Parser). General
 #define GT_ERROR_PARSE_SAM "Parsing SAM error(%s:%"PRIu64":%"PRIu64")"
+#define GT_ERROR_PARSE_SAM_HEADER_NOT_SAM "Parsing SAM Header error(%s). Header file not in SAM format"
+#define GT_ERROR_PARSE_SAM_HEADER_MISSING_TAG "Parsing SAM Header error. @%s record missing %s tag"
+#define GT_ERROR_PARSE_SAM_HEADER_DUPLICATE_TAG "Parsing SAM Header error. @%s record with duplicate %s tag (%s)"
 #define GT_ERROR_PARSE_SAM_BAD_FILE_FORMAT "Parsing SAM error(%s:%"PRIu64":%"PRIu64"). Not a SAM file"
 #define GT_ERROR_PARSE_SAM_BAD_CHARACTER "Parsing SAM error(%s:%"PRIu64":%"PRIu64"). Bad character found"
 #define GT_ERROR_PARSE_SAM_UNMAPPED_XA "Parsing SAM error(%s:%"PRIu64":%"PRIu64"). Unmapped read contains XA field (inconsistency)"
@@ -411,6 +427,9 @@ gt_status gt_tprintf(const char* format,...);
 #define GT_ERROR_PARSE_SAM_CIGAR_PREMATURE_END "Parsing SAM error(%s:%"PRIu64":%"PRIu64"). Premature end of CIGAR string"
 #define GT_ERROR_PARSE_SAM_WRONG_NUM_XA "Parsing SAM error(%s:%"PRIu64":%"PRIu64"). Wrong number of eXtra mAps (as to pair them)"
 #define GT_ERROR_PARSE_SAM_UNSOLVED_PENDING_MAPS "Parsing SAM error(%s:%"PRIu64":%"PRIu64"). Failed to pair maps"
+
+#define GT_ERROR_SAM_OUTPUT_UNKNOWN_RG_ID "SAM output error.  Read group ID %s not found in SAM headers"
+#define GT_ERROR_SAM_OUTPUT_NO_HEADER_FOR_RG "SAM output error.  No SAM header was specified, so read group ID can not be matched"
 
 /*
  * Output File

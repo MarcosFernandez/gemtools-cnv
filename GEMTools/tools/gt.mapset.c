@@ -92,8 +92,8 @@ GT_INLINE gt_status gt_mapset_read_template_sync(
     return GT_IMP_EOF;
   }
   // Synch loop
-  while (gt_string_cmp(gt_template_get_string_tag(template_master),
-      gt_template_get_string_tag(template_slave))) {
+  while (!(gt_streq(gt_template_get_tag(template_master),gt_template_get_tag(template_slave)) &&
+           gt_template_get_pair(template_master)==gt_template_get_pair(template_slave))) {
     // Print non correlative master's template
     if (operation==GT_MAP_SET_UNION || operation==GT_MAP_SET_DIFFERENCE) {
       gt_output_map_bofprint_template(buffered_output,template_master,output_attributes);
@@ -128,7 +128,8 @@ GT_INLINE gt_status gt_mapset_read_template_get_commom_map(
         PRIgts_content(gt_template_get_string_tag(template_master)));
   }
   // Synch loop
-  while (gt_string_cmp(gt_template_get_string_tag(template_master),gt_template_get_string_tag(template_slave))) {
+  while (!(gt_streq(gt_template_get_tag(template_master),gt_template_get_tag(template_slave)) &&
+           gt_template_get_pair(template_master)==gt_template_get_pair(template_slave))) {
     // Fetch next slave's template
     if ((error_code_master=gt_input_generic_parser_get_template(
         buffered_input_slave,template_slave,generic_parser_attr))!=GT_IMP_OK) {

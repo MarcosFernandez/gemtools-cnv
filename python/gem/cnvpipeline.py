@@ -37,7 +37,7 @@ class BwaMappingStep(PipelineStep):
         cfg = self.configuration
  
         gem.bwaMapper(self.pipeline.input,cfg["bwa_reference"],output=self.files()[0],
-                                    threads=cfg["threads"],name=self.pipeline.name,compress=self._compress())
+                                    threads=cfg["threads"],name=self.pipeline.name,compress=self._compress(),tmp=cfg["tmp_folder"])
                                     
 class MergeMappingStep(PipelineStep):
     """ Merge Mapping steps """
@@ -51,7 +51,8 @@ class MergeMappingStep(PipelineStep):
         return self._files   
         
     def run(self):
-        gem.mergeBams(input=self.pipeline.input,output=self.files()[0])
+        cfg = self.configuration
+        gem.mergeBams(input=self.pipeline.input,output=self.files()[0],threads=cfg["threads"])
 
    
 class MarkDuplicatesStep(PipelineStep):
@@ -1210,6 +1211,7 @@ class BwaMemPipeline(BasePipeline):
         
         config.bwa_reference = self.bwa_reference
         config.threads = self.threads
+        config.tmp_folder = self.tmp_folder
         
         if configuration is not None:
             self.__update_dict(config, configuration)
@@ -1347,6 +1349,8 @@ class RmDupPipeline(BasePipeline):
         step = MergeMappingStep(name, final=final, dependencies=dependencies, description=description, file_suffix="bam")
         config = dotdict()
         
+        config.threads = self.threads        
+        
         if configuration is not None:
             self.__update_dict(config, configuration)
             
@@ -1443,6 +1447,7 @@ class RmDupPipeline(BasePipeline):
         printer("Picard Path    : %s", self.picard_path)
         printer("Java Heap      : %s", self.java_heap) 
         printer("TMP folder     : %s", self.tmp_folder) 
+        printer("Threads_number   : %s", self.threads)
         printer("")
         
     def register_general(self, parser):
@@ -1456,6 +1461,10 @@ class RmDupPipeline(BasePipeline):
         input_group.add_argument('-f', '--files', dest="input", nargs="+", metavar="input",
             help='''One or more bam files. For more than one bam file a bam merging will be performed
             before running PCR remove duplicates''')
+            
+        #-T threads_number
+        input_group.add_argument('-T','--threads',type=int,dest="threads", metavar="t", 
+                                   help='Number of threads. Default to %d' % self.threads)
             
                     
     def register_class_parameters(self,parser):

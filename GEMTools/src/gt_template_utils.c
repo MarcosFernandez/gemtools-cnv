@@ -36,7 +36,7 @@ GT_INLINE void gt_template_setup_pair_attributes_to_alignments(gt_template* cons
 }
 GT_INLINE uint64_t gt_template_get_read_proportion(gt_template* const template,const float proportion) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_get_read_proportion(alignment,proportion);
   } GT_TEMPLATE_END_REDUCTION;
   const uint64_t read_length_end1 = gt_string_get_length(gt_template_get_end1(template)->read);
@@ -228,7 +228,7 @@ GT_INLINE bool gt_template_is_mmap_contained_fx(
 }
 
 GT_INLINE void gt_template_reduce_mmaps(gt_template* const template,const uint64_t max_num_matches) {
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     gt_alignment_reduce_maps(alignment,max_num_matches);
   } GT_TEMPLATE_END_REDUCTION__RETURN;
   const uint64_t num_matches = gt_template_get_num_mmaps(template);
@@ -260,17 +260,28 @@ GT_INLINE int64_t gt_template_get_insert_size(gt_map** const mmap,gt_status* gt_
   // Get last block of each map
   gt_map *block[2]={0,0};
   uint64_t length[2]={0,0};
+  uint64_t bs_type[2]={GT_BIS_TYPE_UNKNOWN,GT_BIS_TYPE_UNKNOWN};
   int64_t x=0;
   *gt_error=GT_TEMPLATE_INSERT_SIZE_OK;
-  GT_MAP_ITERATE(mmap[0],map_it) {
-    block[0]=map_it;
-    length[0]+=gt_map_get_base_length(block[0]);
-  } 
-  GT_MAP_ITERATE(mmap[1],map_it2) {
-    block[1]=map_it2;
-    length[1]+=gt_map_get_base_length(block[1]);
-  } 
-  if(gt_string_equals(block[0]->seq_name,block[1]->seq_name)) {
+  int i=0;
+  for(i=0;i<2;i++) {
+    if(mmap[i]) {
+      gt_attributes *attr=mmap[i]->attributes;
+      if(attr) {
+	void  *temp_p=gt_attributes_get(attr,GT_ATTR_ID_BIS_TYPE);
+	if(temp_p) bs_type[i]=*(uint64_t *)temp_p;
+      }
+      GT_MAP_ITERATE(mmap[i],map_it) {
+	block[i]=map_it;
+	length[i]+=gt_map_get_base_length(block[i]);
+      }
+    }
+  }
+  if(block[0] == NULL || block[1] == NULL){
+    *gt_error=GT_TEMPLATE_INSERT_SIZE_UNPAIRED;
+    return 0;
+  }
+  if(bs_type[0]==bs_type[1] && bs_type[0]!=GT_BIS_TYPE_MISMATCH && gt_string_equals(block[0]->seq_name,block[1]->seq_name)) {
     if(block[0]->strand!=block[1]->strand) {
       if(block[0]->strand==FORWARD) {
       		x=1+block[1]->position+length[1]-(block[0]->position+length[0]-gt_map_get_base_length(block[0]));
@@ -298,7 +309,7 @@ GT_INLINE bool gt_template_is_mapped(gt_template* const template) {
 }
 GT_INLINE bool gt_template_is_thresholded_mapped(gt_template* const template,const uint64_t max_allowed_strata) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_is_thresholded_mapped(alignment,max_allowed_strata);
   } GT_TEMPLATE_END_REDUCTION;
   if (gt_template_get_not_unique_flag(template)) return true;
@@ -313,7 +324,7 @@ GT_INLINE bool gt_template_is_thresholded_mapped(gt_template* const template,con
 
 GT_INLINE void gt_template_recalculate_counters(gt_template* const template) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     gt_alignment_recalculate_counters(alignment);
   } GT_TEMPLATE_END_REDUCTION__RETURN;
   // Clear previous counters
@@ -322,7 +333,7 @@ GT_INLINE void gt_template_recalculate_counters(gt_template* const template) {
   const uint64_t num_blocks = gt_template_get_num_blocks(template);
   GT_TEMPLATE_ITERATE_MMAP__ATTR_(template,mmap,mmap_attr) {
     uint64_t i, total_distance = 0;
-    for (i=0;i<num_blocks;++i) {
+    for (i=0;i<num_blocks;++i) if(mmap[i] != NULL) {
       total_distance+=gt_map_get_global_distance(mmap[i]);
     }
     mmap_attr->distance=total_distance;
@@ -332,7 +343,7 @@ GT_INLINE void gt_template_recalculate_counters(gt_template* const template) {
 
 GT_INLINE void gt_template_recalculate_counters_no_splits(gt_template* const template) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     gt_alignment_recalculate_counters_no_splits(alignment);
   } GT_TEMPLATE_END_REDUCTION__RETURN;
   // Clear previous counters
@@ -341,7 +352,7 @@ GT_INLINE void gt_template_recalculate_counters_no_splits(gt_template* const tem
   const uint64_t num_blocks = gt_template_get_num_blocks(template);
   GT_TEMPLATE_ITERATE_MMAP__ATTR_(template,mmap,mmap_attr) {
     uint64_t i, total_distance = 0;
-    for (i=0;i<num_blocks;++i) {
+    for (i=0;i<num_blocks;++i) if(mmap[i] != NULL) {
       total_distance+=gt_map_get_no_split_distance(mmap[i]);
     }
     mmap_attr->distance=total_distance;
@@ -352,14 +363,14 @@ GT_INLINE void gt_template_recalculate_counters_no_splits(gt_template* const tem
 
 GT_INLINE int64_t gt_template_get_min_matching_strata(gt_template* const template) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_get_min_matching_strata(alignment);
   } GT_TEMPLATE_END_REDUCTION;
   return gt_counters_get_min_matching_strata(gt_template_get_counters_vector(template));
 }
 GT_INLINE int64_t gt_template_get_uniq_degree(gt_template* const template) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_get_uniq_degree(alignment);
   } GT_TEMPLATE_END_REDUCTION;
   return gt_counters_get_uniq_degree(gt_template_get_counters_vector(template));
@@ -368,7 +379,7 @@ GT_INLINE bool gt_template_get_next_matching_strata(
     gt_template* const template,const uint64_t begin_strata,
     uint64_t* const next_matching_strata,uint64_t* const num_maps) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_get_next_matching_strata(alignment,begin_strata,next_matching_strata,num_maps);
   } GT_TEMPLATE_END_REDUCTION;
   return gt_counters_get_next_matching_strata(gt_template_get_counters_vector(template),
@@ -403,7 +414,7 @@ int gt_mmap_cmp_distance__score(gt_mmap* const mmap_a,gt_mmap* const mmap_b) {
  */
 GT_INLINE void gt_template_sort_by_distance__score(gt_template* const template) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_sort_by_distance__score(alignment);
   } GT_TEMPLATE_END_REDUCTION;
   // Sort
@@ -414,7 +425,7 @@ GT_INLINE void gt_template_sort_by_distance__score(gt_template* const template) 
 
 GT_INLINE void gt_template_sort_by_distance__score_no_split(gt_template* const template) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_sort_by_distance__score_no_split(alignment);
   } GT_TEMPLATE_END_REDUCTION;
   // Sort
@@ -427,7 +438,7 @@ GT_INLINE void gt_template_sort_by_distance__score_no_split(gt_template* const t
  */
 GT_INLINE uint64_t gt_template_sum_mismatch_qualities(gt_template* const template,gt_map** const mmap) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_sum_mismatch_qualities(alignment,mmap[0]);
   } GT_TEMPLATE_END_REDUCTION;
   return gt_alignment_sum_mismatch_qualities(gt_template_get_block(template,0),mmap[0]) +
@@ -435,7 +446,7 @@ GT_INLINE uint64_t gt_template_sum_mismatch_qualities(gt_template* const templat
 }
 GT_INLINE uint64_t gt_template_get_max_mismatch_quality(gt_template* const template) {
   GT_TEMPLATE_CHECK(template);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     return gt_alignment_get_max_mismatch_quality(alignment);
   } GT_TEMPLATE_END_REDUCTION;
   uint64_t max_qual = 0;
@@ -452,8 +463,8 @@ GT_INLINE void gt_template_merge_template_mmaps(gt_template* const template_dst,
   GT_TEMPLATE_CHECK(template_dst);
   GT_TEMPLATE_CHECK(template_src);
   GT_TEMPLATE_COMMON_CONSISTENCY_ERROR(template_dst,template_src);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template_src,alignment_src) {
-    GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template_dst,alignment_dst) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template_src,alignment_src) {
+    GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template_dst,alignment_dst) {
       gt_alignment_merge_alignment_maps(alignment_dst,alignment_src);
     } GT_TEMPLATE_END_REDUCTION;
   } GT_TEMPLATE_END_REDUCTION__RETURN;
@@ -465,8 +476,8 @@ GT_INLINE void gt_template_merge_template_mmaps_fx(
     gt_template* const template_dst,gt_template* const template_src) {
   GT_NULL_CHECK(gt_mmap_cmp_fx); GT_NULL_CHECK(gt_map_cmp_fx);
   GT_TEMPLATE_COMMON_CONSISTENCY_ERROR(template_dst,template_src);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template_src,alignment_src) {
-    GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template_dst,alignment_dst) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template_src,alignment_src) {
+    GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template_dst,alignment_dst) {
       gt_alignment_merge_alignment_maps_fx(gt_map_cmp_fx,alignment_dst,alignment_src);
     } GT_TEMPLATE_END_REDUCTION;
   } GT_TEMPLATE_END_REDUCTION__RETURN;
@@ -573,8 +584,8 @@ GT_INLINE gt_template* gt_template_subtract_template_mmaps_fx(
   GT_NULL_CHECK(gt_mmap_cmp_fx);
   GT_NULL_CHECK(gt_map_cmp_fx);
   GT_TEMPLATE_COMMON_CONSISTENCY_ERROR(template_minuend,template_subtrahend);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template_minuend,alignment_minuend) {
-    GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template_subtrahend,alignment_subtrahend) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template_minuend,alignment_minuend) {
+    GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template_subtrahend,alignment_subtrahend) {
       gt_alignment* const alignment_difference =
           gt_alignment_subtract_alignment_maps_fx(gt_map_cmp_fx,alignment_minuend,alignment_subtrahend);
       gt_template* const template_difference = gt_template_new();
@@ -611,8 +622,8 @@ GT_INLINE gt_template* gt_template_intersect_template_mmaps_fx(
   GT_NULL_CHECK(gt_mmap_cmp_fx);
   GT_NULL_CHECK(gt_map_cmp_fx);
   GT_TEMPLATE_COMMON_CONSISTENCY_ERROR(template_A,template_B);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template_A,alignment_A) {
-    GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template_B,alignment_B) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template_A,alignment_A) {
+    GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template_B,alignment_B) {
       gt_alignment* const alignment_intersection =
           gt_alignment_intersect_alignment_maps_fx(gt_map_cmp_fx,alignment_A,alignment_B);
       gt_template* const template_intersection = gt_template_new();
@@ -736,7 +747,7 @@ GT_INLINE void gt_map_placeholder_delete(gt_map_placeholder* const map_placehold
 }
 GT_INLINE void gt_map_placeholder_clear(gt_map_placeholder* const map_placeholder) {
   GT_NULL_CHECK(map_placeholder);
-  memset(map_placeholder,0,sizeof(map_placeholder));
+  memset(map_placeholder,0,sizeof(gt_map_placeholder));
 }
 GT_INLINE void gt_map_placeholder_set_sam_fields(gt_map_placeholder* const map_placeholder,
     const bool not_passing_QC,const bool PCR_duplicate,const uint32_t hard_trim_left,const uint32_t hard_trim_right) {
@@ -757,7 +768,6 @@ GT_INLINE void gt_map_placeholder_set_sam_fields(gt_map_placeholder* const map_p
 #define GT_MAP_PLACEHOLDER_CMP_CHECK_BOUNDARY_CONDITIONS(ph_map_a,ph_map_b) \
   /* Boundary conditions (Different type, same map, unmapped) */ \
   if (ph_map_a->type!=ph_map_b->type) return ((int)ph_map_a->type - (int)ph_map_b->type); /* Check different type */ \
-  if (ph_map_a->map==ph_map_b->map) return 0; /* Check same map */ \
   if (ph_map_a->map==NULL || ph_map_b->map==NULL) return (ph_map_a->map==NULL) ? 1 : -1; /* Check unmapped */
 int gt_map_placeholder_cmp_coordinates(gt_map_placeholder* const ph_map_a,gt_map_placeholder* const ph_map_b) {
   // NOTE: Doesn't check chromosome
@@ -774,6 +784,10 @@ int gt_map_placeholder_cmp_map_distance(gt_map_placeholder* const ph_map_a,gt_ma
   // TODO
   return 0;
 }
+
+/* Enable scoring reads by phred scores.  Even if scores not available, will score paired templates higher
+ * than non-paired.
+ */
 int gt_map_placeholder_cmp_map_phred_scores(gt_map_placeholder* const ph_map_a,gt_map_placeholder* const ph_map_b) {
   /*
    * Compare phred scores ( -10*log(Pr{mapping position is wrong},10) )
@@ -782,8 +796,18 @@ int gt_map_placeholder_cmp_map_phred_scores(gt_map_placeholder* const ph_map_a,g
    */
   GT_MAP_PLACEHOLDER_CMP_CHECK_BOUNDARY_CONDITIONS(ph_map_a,ph_map_b);
   // Here, different map with same type and both mapped
-  const int score_a = ph_map_a->map->phred_score;
-  const int score_b = ph_map_b->map->phred_score;
+  int score_a = ph_map_a->map->phred_score;
+  int score_b = ph_map_b->map->phred_score;
+  if(ph_map_a->type==GT_MMAP_PLACEHOLDER_PAIRED) {
+  	if(ph_map_b->type==GT_MMAP_PLACEHOLDER_PAIRED) {
+  		score_a = ph_map_a->paired_end.mmap_attributes->phred_score;
+  		score_b = ph_map_b->paired_end.mmap_attributes->phred_score;
+  	} else {
+  		return -1;
+  	}
+  } else if(ph_map_b->type==GT_MMAP_PLACEHOLDER_PAIRED) {
+  	return 1;
+  }
   // No scored
   if (score_a==GT_MAP_NO_PHRED_SCORE || score_b==GT_MAP_NO_PHRED_SCORE) return score_a-score_b;
   // Regular compare (including case (score_a==0 || score_b==0))
@@ -852,6 +876,7 @@ GT_INLINE void gt_map_placeholder_add_mmap(
   uint64_t num_placeholders = gt_vector_get_used(mmap_placeholder);
   // Note that (map_endA!=NULL) || (map_endB!=NULL) must hold
   mmap_ph->paired_end.paired_end_position = paired_end_position;
+  mmap_ph->supplementary_alignment = false;
   if (map_endA==NULL) {
     /*
      * End/1 Unmapped
@@ -881,10 +906,16 @@ GT_INLINE void gt_map_placeholder_add_mmap(
         mmap_ph->hard_trim_left = (split_segments) ? gt_map_segment_iterator_get_accumulated_offset(&map_segment_iterator_end1) : 0;
         mmap_ph->hard_trim_right = (split_segments) ? gt_map_segment_iterator_get_remaining_bases(&map_segment_iterator_end1,read_endA) : 0;
         gt_vector_insert(mmap_placeholder,*mmap_ph,gt_map_placeholder);
-        // Pick primary alignment
-        if (cmp_with_best) GT_MAP_PLACEHOLDER_CMP_BEST_PH(*best_mmap_ph,*best_mmap_ph_position,*mmap_ph,num_placeholders);
+        if(mmap_ph->supplementary_alignment == false) {
+        	// Pick primary alignment
+        	if (cmp_with_best) GT_MAP_PLACEHOLDER_CMP_BEST_PH(*best_mmap_ph,*best_mmap_ph_position,*mmap_ph,num_placeholders);
+        } else {
+        	if(!mmap_ph->map->attributes) mmap_ph->map->attributes=gt_attributes_new();
+        	gt_attributes_add(mmap_ph->map->attributes,GT_ATTR_ID_HEAD_BLOCK,&map_endA,gt_map*);
+        }
         ++num_placeholders;
         if (!split_segments) break; // Break if quimeras are not supposed to be unfolded
+        mmap_ph->supplementary_alignment = true;
       }
     } else {
       /*
@@ -892,18 +923,21 @@ GT_INLINE void gt_map_placeholder_add_mmap(
        */
       mmap_ph->type = GT_MMAP_PLACEHOLDER_PAIRED;
       GT_MAP_SEGMENT_ITERATOR(map_endA,map_segment_iterator_end1) {
-        GT_MAP_SEGMENT_ITERATOR(map_endB,map_segment_iterator_end2) {
-          mmap_ph->map = gt_map_segment_iterator_get_map(&map_segment_iterator_end1);
-          mmap_ph->paired_end.mate = gt_map_segment_iterator_get_map(&map_segment_iterator_end2);
-          mmap_ph->hard_trim_left = (split_segments) ? gt_map_segment_iterator_get_accumulated_offset(&map_segment_iterator_end1) : 0;
-          mmap_ph->hard_trim_right = (split_segments) ? gt_map_segment_iterator_get_remaining_bases(&map_segment_iterator_end1,read_endA) : 0;
-          gt_vector_insert(mmap_placeholder,*mmap_ph,gt_map_placeholder);
-          // Pick primary alignment
-          if (cmp_with_best) GT_MAP_PLACEHOLDER_CMP_BEST_PH(*best_mmap_ph,*best_mmap_ph_position,*mmap_ph,num_placeholders);
-          ++num_placeholders;
-          if (!split_segments) break; // Break if quimeras are not supposed to be unfolded
-        }
-        if (!split_segments) break; // Break if quimeras are not supposed to be unfolded
+      	mmap_ph->map = gt_map_segment_iterator_get_map(&map_segment_iterator_end1);
+      	mmap_ph->paired_end.mate = map_endB;
+      	mmap_ph->hard_trim_left = (split_segments) ? gt_map_segment_iterator_get_accumulated_offset(&map_segment_iterator_end1) : 0;
+      	mmap_ph->hard_trim_right = (split_segments) ? gt_map_segment_iterator_get_remaining_bases(&map_segment_iterator_end1,read_endA) : 0;
+      	gt_vector_insert(mmap_placeholder,*mmap_ph,gt_map_placeholder);
+      	if(mmap_ph->supplementary_alignment == false) {
+      		// Pick primary alignment
+      		if (cmp_with_best) GT_MAP_PLACEHOLDER_CMP_BEST_PH(*best_mmap_ph,*best_mmap_ph_position,*mmap_ph,num_placeholders);
+      	} else {
+      		if(!mmap_ph->map->attributes) mmap_ph->map->attributes=gt_attributes_new();
+      		gt_attributes_add(mmap_ph->map->attributes,GT_ATTR_ID_HEAD_BLOCK,&map_endA,gt_map*);
+      	}
+      	++num_placeholders;
+      	if (!split_segments) break; // Break if quimeras are not supposed to be unfolded
+        mmap_ph->supplementary_alignment = true;
       }
     }
   }
@@ -916,7 +950,7 @@ GT_INLINE void gt_map_placeholder_build_from_template(
     gt_map_placeholder* const placeholder_template) {
   GT_TEMPLATE_CHECK(template);
   GT_VECTOR_CHECK(mmap_placeholder);
-  GT_TEMPLATE_IF_REDUCES_TO_ALINGMENT(template,alignment) {
+  GT_TEMPLATE_IF_REDUCES_TO_ALIGNMENT(template,alignment) {
     placeholder_template->single_end.template = template;
     gt_map_placeholder_build_from_alignment(alignment,mmap_placeholder,split_segments,max_num_maps,
         gt_ph_cmp_fx,primary_mmap_end1_pos,placeholder_template);
@@ -927,6 +961,8 @@ GT_INLINE void gt_map_placeholder_build_from_template(
   if (placeholder_template!=NULL) mmap_ph=*placeholder_template;
   mmap_ph.paired_end.template = template;
   mmap_ph.secondary_alignment = true;
+  if(primary_mmap_end1_pos!=NULL) *primary_mmap_end1_pos=0;
+  if(primary_mmap_end2_pos!=NULL) *primary_mmap_end2_pos=0;
   // Gather initial data
   const uint64_t num_initial_placeholders = gt_vector_get_used(mmap_placeholder);
   gt_string* const read[2] = {gt_template_get_end1(template)->read,gt_template_get_end2(template)->read};
@@ -935,7 +971,7 @@ GT_INLINE void gt_map_placeholder_build_from_template(
   gt_map_placeholder best_mmap_ph_end1, best_mmap_ph_end2;
   uint64_t best_mmap_ph_end1_pos = UINT64_MAX, best_mmap_ph_end2_pos = UINT64_MAX;
   if (gt_template_get_num_mmaps(template)==0) { // Unmmapped
-    // Include unampped mmap
+    // Include unmapped mmap
     mmap_ph.paired_end.mmap_attributes = NULL;
     gt_map_placeholder_add_mmap(NULL,NULL,read[0],0,
         mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end1_pos!=NULL,
@@ -949,59 +985,86 @@ GT_INLINE void gt_map_placeholder_build_from_template(
     // Include mmaps
     bool end1_record_included = false, end2_record_included = false;
     GT_TEMPLATE_ITERATE_MMAP__ATTR_(template,mmap,mmap_attr) {
-      mmap_ph.paired_end.mmap_attributes = mmap_attr;
-      if (include_mate_placeholder) {
-        if (mmap[0]!=NULL) {
-          end1_record_included = true;
-          gt_map_placeholder_add_mmap(mmap[0],mmap[1],read[0],0,
-              mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end1_pos!=NULL,
-              &best_mmap_ph_end1,&best_mmap_ph_end1_pos,&mmap_ph); // End/1
-        }
-        if (mmap[1]!=NULL) {
-          end2_record_included = true;
-          gt_map_placeholder_add_mmap(mmap[1],mmap[0],read[1],1,
-              mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end2_pos!=NULL,
-              &best_mmap_ph_end2,&best_mmap_ph_end2_pos,&mmap_ph); // End/2
-        }
-      } else {
-        gt_map_placeholder_add_mmap(mmap[0],mmap[1],read[0],0,
+    	if(mmap[0]==NULL && mmap[1]==NULL) {
+        mmap_ph.paired_end.mmap_attributes = NULL;
+        gt_map_placeholder_add_mmap(NULL,NULL,read[0],0,
             mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end1_pos!=NULL,
             &best_mmap_ph_end1,&best_mmap_ph_end1_pos,&mmap_ph); // End/1
-      }
+        if (include_mate_placeholder) {
+          gt_map_placeholder_add_mmap(NULL,NULL,read[0],1,
+              mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end2_pos!=NULL,
+              &best_mmap_ph_end2,&best_mmap_ph_end2_pos,&mmap_ph); // End/2
+          end1_record_included=end2_record_included=true;
+        }
+    	} else {
+    		mmap_ph.paired_end.mmap_attributes = mmap_attr;
+    		if (include_mate_placeholder) {
+    			if (mmap[0]!=NULL) {
+    				end1_record_included = true;
+    				gt_map_placeholder_add_mmap(mmap[0],mmap[1],read[0],0,
+    						mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end1_pos!=NULL,
+    						&best_mmap_ph_end1,&best_mmap_ph_end1_pos,&mmap_ph); // End/1
+    			}
+    			if (mmap[1]!=NULL) {
+    				end2_record_included = true;
+    				gt_map_placeholder_add_mmap(mmap[1],mmap[0],read[1],1,
+    						mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end2_pos!=NULL,
+    						&best_mmap_ph_end2,&best_mmap_ph_end2_pos,&mmap_ph); // End/2
+    			}
+    		} else {
+    			gt_map_placeholder_add_mmap(mmap[0],mmap[1],read[0],0,
+    					mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end1_pos!=NULL,
+    					&best_mmap_ph_end1,&best_mmap_ph_end1_pos,&mmap_ph); // End/1
+    		}
+    	}
       if (++num_mmaps_added > max_num_maps) break;
     }
     // Check if at least we have a record per each end
+  	// For an unmapped end, include the primary mapping of the mapped end (if it exists) as the mate
     if (include_mate_placeholder) {
       if (!end1_record_included) {
-        gt_map_placeholder_add_mmap(NULL,NULL,read[0],0,
+        gt_map_placeholder_add_mmap(NULL,primary_mmap_end2_pos?best_mmap_ph_end2.map:NULL,read[0],0,
             mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end1_pos!=NULL,
             &best_mmap_ph_end1,&best_mmap_ph_end1_pos,&mmap_ph); // End/1
       }
       if (!end2_record_included) {
-        gt_map_placeholder_add_mmap(NULL,NULL,read[1],1,
+        gt_map_placeholder_add_mmap(NULL,primary_mmap_end2_pos?best_mmap_ph_end1.map:NULL,read[1],1,
             mmap_placeholder,split_segments,gt_ph_cmp_fx,primary_mmap_end2_pos!=NULL,
             &best_mmap_ph_end2,&best_mmap_ph_end2_pos,&mmap_ph); // End/2
       }
     }
   }
-  // Set primary alignment
+  // Set primary alignment and move to front if necessary
   if (primary_mmap_end1_pos!=NULL) {
-    *primary_mmap_end1_pos = best_mmap_ph_end1_pos;
-    gt_vector_get_elm(mmap_placeholder,best_mmap_ph_end1_pos,gt_map_placeholder)->secondary_alignment = false;
-    GT_SWAP(*(gt_vector_get_elm(mmap_placeholder,best_mmap_ph_end1_pos,gt_map_placeholder)),
-            *(gt_vector_get_elm(mmap_placeholder,num_initial_placeholders,gt_map_placeholder)));
+//  	*primary_mmap_end1_pos = best_mmap_ph_end1_pos;
+  	*primary_mmap_end1_pos = num_initial_placeholders;
+  	gt_vector_get_elm(mmap_placeholder,best_mmap_ph_end1_pos,gt_map_placeholder)->secondary_alignment = false;
+  	// Move primary alignment to front of list if not already there
+  	GT_SWAP(*(gt_vector_get_elm(mmap_placeholder,best_mmap_ph_end1_pos,gt_map_placeholder)),
+  			*(gt_vector_get_elm(mmap_placeholder,num_initial_placeholders,gt_map_placeholder)));
+  	if(primary_mmap_end2_pos!=NULL && best_mmap_ph_end2_pos==num_initial_placeholders) best_mmap_ph_end2_pos=best_mmap_ph_end1_pos;
   }
   if (primary_mmap_end2_pos!=NULL) {
-    if (include_mate_placeholder) {
-      *primary_mmap_end2_pos = best_mmap_ph_end2_pos;
-      gt_vector_get_elm(mmap_placeholder,best_mmap_ph_end2_pos,gt_map_placeholder)->secondary_alignment = false;
-      GT_SWAP(*(gt_vector_get_elm(mmap_placeholder,best_mmap_ph_end2_pos,gt_map_placeholder)),
-              *(gt_vector_get_elm(mmap_placeholder,num_initial_placeholders+1,gt_map_placeholder))); // Courtesy
-    } else {
-      if (primary_mmap_end1_pos!=NULL) *primary_mmap_end2_pos = *primary_mmap_end1_pos;
-    }
+  	if (include_mate_placeholder) {
+//  		*primary_mmap_end2_pos = best_mmap_ph_end2_pos;
+  		*primary_mmap_end2_pos=num_initial_placeholders+1;
+    	gt_vector_get_elm(mmap_placeholder,best_mmap_ph_end2_pos,gt_map_placeholder)->secondary_alignment=false;
+    	// Move all segments
+    	GT_SWAP(*(gt_vector_get_elm(mmap_placeholder,best_mmap_ph_end2_pos,gt_map_placeholder)),
+    			*(gt_vector_get_elm(mmap_placeholder,num_initial_placeholders+1,gt_map_placeholder))); // Courtesy
+  	}
+  }
+  // If the primary alignments are unpaired, set up the mate links and flags
+  if (primary_mmap_end1_pos && primary_mmap_end2_pos) {
+  	gt_map_placeholder *ph1=gt_vector_get_elm(mmap_placeholder,num_initial_placeholders,gt_map_placeholder);
+  	gt_map_placeholder *ph2=gt_vector_get_elm(mmap_placeholder,num_initial_placeholders+1,gt_map_placeholder);
+  	if(ph1->map && ph2->map && !ph1->paired_end.mate) {
+  		ph1->paired_end.mate=ph2->map;
+  		ph2->paired_end.mate=ph1->map;
+  	}
   }
 }
+
 /*
  * Fills the placeholder's vector @mmap_placeholder with all the maps from alignment
  *   - If @split_segments is set, individual segments are inserted into @mmap_placeholder (taking into account quimeras/segments)
@@ -1018,6 +1081,7 @@ GT_INLINE void gt_map_placeholder_add_map(
     gt_map_placeholder* const mmap_ph) {
   uint64_t num_placeholders = gt_vector_get_used(mmap_placeholder);
   mmap_ph->type = GT_MAP_PLACEHOLDER;
+  mmap_ph->supplementary_alignment = false;
   if (map==NULL) { // Unmapped
     mmap_ph->map = NULL;
     mmap_ph->hard_trim_left = 0;
@@ -1032,12 +1096,17 @@ GT_INLINE void gt_map_placeholder_add_map(
       mmap_ph->hard_trim_right = (split_segments) ? gt_map_segment_iterator_get_remaining_bases(&map_segment_iterator,read) : 0;
       gt_vector_insert(mmap_placeholder,*mmap_ph,gt_map_placeholder);
       // Pick primary alignment
-      if (best_mmap_ph_position!=NULL) {
-        GT_MAP_PLACEHOLDER_CMP_BEST_PH(*best_mmap_ph,*best_mmap_ph_position,*mmap_ph,num_placeholders);
+      if(mmap_ph->supplementary_alignment == false) {
+        if (best_mmap_ph_position!=NULL)
+          GT_MAP_PLACEHOLDER_CMP_BEST_PH(*best_mmap_ph,*best_mmap_ph_position,*mmap_ph,num_placeholders);
+      } else {
+      	if(!mmap_ph->map->attributes) mmap_ph->map->attributes=gt_attributes_new();
+      	gt_attributes_add(mmap_ph->map->attributes,GT_ATTR_ID_HEAD_BLOCK,&map,gt_map*);
       }
       ++num_placeholders;
       // Break if quimeras are not supposed to be unfolded
       if (!split_segments) break;
+      mmap_ph->supplementary_alignment = true;
     }
   }
 }
@@ -1048,6 +1117,7 @@ GT_INLINE void gt_map_placeholder_build_from_alignment(
   GT_ALIGNMENT_CHECK(alignment);
   GT_VECTOR_CHECK(mmap_placeholder);
   // Prepare placeholder template
+  if(primary_map_position!=NULL) *primary_map_position=0;
   gt_map_placeholder mmap_ph;
   if (placeholder_template!=NULL) mmap_ph=*placeholder_template;
   const uint64_t num_maps = gt_alignment_get_num_maps(alignment);

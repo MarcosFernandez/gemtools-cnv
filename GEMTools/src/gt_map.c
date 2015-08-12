@@ -21,7 +21,7 @@ GT_INLINE gt_map* gt_map_new() {
   map->position = 0;
   map->base_length = 0;
   map->gt_score = GT_MAP_NO_GT_SCORE;
-  map->phred_score = GT_MAP_NO_PHRED_SCORE;
+  map->phred_score = map->se_phred_score = GT_MAP_NO_PHRED_SCORE;
   map->mismatches = gt_vector_new(GT_MAP_NUM_INITIAL_MISMS,sizeof(gt_misms));
   map->next_block.map = NULL;
   map->attributes = NULL;
@@ -33,7 +33,7 @@ GT_INLINE void gt_map_clear(gt_map* const map) {
   map->position = 0;
   map->base_length = 0;
   map->gt_score = GT_MAP_NO_GT_SCORE;
-  map->phred_score = GT_MAP_NO_PHRED_SCORE;
+  map->phred_score = map->se_phred_score = GT_MAP_NO_PHRED_SCORE;
   gt_map_clear_misms(map);
   map->next_block.map = NULL;
   if (map->attributes!=NULL) gt_attributes_clear(map->attributes);
@@ -449,9 +449,9 @@ GT_INLINE void gt_map_reverse_blocks_positions(gt_map* const head_map,const uint
 #define GT_MAP_REVERSE_MISMS_ADJUST_POS(misms,base_length) \
   misms->position = base_length - misms->position; \
   switch (misms->misms_type) { \
-    case DEL: misms->position-=misms->size; break; \
-    case INS: misms->position++; break; \
-    default: break; \
+  case DEL: misms->position-=misms->size; break;			\
+  case INS: misms->position++; break;					\
+ default: break; \
   }
 GT_INLINE void gt_map_reverse_misms(gt_map* const map) {
   GT_MAP_CHECK(map);
@@ -656,6 +656,7 @@ GT_INLINE gt_map* gt_map_copy(gt_map* const map) {
   map_cpy->base_length = map->base_length;
   map_cpy->strand = map->strand;
   map_cpy->phred_score = map->phred_score;
+  map_cpy->se_phred_score = map->se_phred_score;
   map_cpy->gt_score = map->gt_score;
   gt_vector_copy(map_cpy->mismatches,map->mismatches);
   // Copy next blocks
@@ -670,8 +671,12 @@ GT_INLINE gt_map** gt_mmap_array_copy(gt_map** mmap,const uint64_t num_blocks) {
   gt_map** mmap_copy = gt_calloc(num_blocks,gt_map*,false);
   uint64_t i;
   for (i=0;i<num_blocks;++i) {
-    GT_MAP_CHECK(mmap[i]);
-    mmap_copy[i] = gt_map_copy(mmap[i]);
+    if(mmap[i] != NULL){
+      GT_MAP_CHECK(mmap[i]);
+      mmap_copy[i] = gt_map_copy(mmap[i]);
+    }else{
+      mmap_copy[i] = NULL;
+    }
   }
   return mmap_copy;
 }

@@ -7,6 +7,7 @@ GEMTools/Makefile
 GEMTools/Makefile.mk
 GEMTools/Makefile.mk.in
 GEMTools/Tasks.todo
+GEMTools/attributes
 GEMTools/config.log
 GEMTools/config.status
 GEMTools/configure
@@ -270,6 +271,7 @@ GEMTools-cnv/tools/kmermaker.c
 GEMTools-cnv/tools/kmermaker.h
 GEMTools/bin/align_stats
 GEMTools/bin/gt.construct
+GEMTools/bin/gt.coverage
 GEMTools/bin/gt.filter
 GEMTools/bin/gt.gtfcount
 GEMTools/bin/gt.map2sam
@@ -316,6 +318,7 @@ GEMTools/build/gt_output_generic_printer.o
 GEMTools/build/gt_output_map.o
 GEMTools/build/gt_output_printer.o
 GEMTools/build/gt_output_sam.o
+GEMTools/build/gt_pipe_io.o
 GEMTools/build/gt_profiler.o
 GEMTools/build/gt_sam_attributes.o
 GEMTools/build/gt_segmented_sequence.o
@@ -388,6 +391,7 @@ GEMTools/include/gt_output_generic_printer.h
 GEMTools/include/gt_output_map.h
 GEMTools/include/gt_output_printer.h
 GEMTools/include/gt_output_sam.h
+GEMTools/include/gt_pipe_io.h
 GEMTools/include/gt_profiler.h
 GEMTools/include/gt_sam_attributes.h
 GEMTools/include/gt_segmented_sequence.h
@@ -415,7 +419,6 @@ GEMTools/resources/src/json.c
 GEMTools/src/Makefile
 GEMTools/src/gem_tools.c
 GEMTools/src/gt_alignment.c
-GEMTools/src/gt_alignment.c~
 GEMTools/src/gt_alignment_utils.c
 GEMTools/src/gt_attributes.c
 GEMTools/src/gt_buffered_input_file.c
@@ -455,9 +458,9 @@ GEMTools/src/gt_output_generic_printer.c
 GEMTools/src/gt_output_map.c
 GEMTools/src/gt_output_printer.c
 GEMTools/src/gt_output_sam.c
+GEMTools/src/gt_pipe_io.c
 GEMTools/src/gt_profiler.c
 GEMTools/src/gt_sam_attributes.c
-GEMTools/src/gt_sam_data_attributes.c
 GEMTools/src/gt_segmented_sequence.c
 GEMTools/src/gt_sequence_archive.c
 GEMTools/src/gt_shash.c
@@ -480,6 +483,7 @@ GEMTools/test/gt_utest_gtf.c
 GEMTools/test/gt_utest_parsers.c
 GEMTools/test/script/gt_itest_map_parser.sh
 GEMTools/test/script/test_gtfcounts.sh
+GEMTools/test/sh_tests/test_map2sam_00.sh
 GEMTools/test/testdata/chr1.gtf
 GEMTools/test/testdata/counts.gtf
 GEMTools/test/testdata/counts.map
@@ -497,12 +501,12 @@ GEMTools/test/testdata/single_paired.map
 GEMTools/test/testdata/single_paired_casava_additional.fastq
 GEMTools/test/testdata/single_paired_casava_additional.map
 GEMTools/tools/Makefile
-GEMTools/tools/Makefile~
 GEMTools/tools/align_stats.c
 GEMTools/tools/align_stats.h
 GEMTools/tools/get_coverage.c
 GEMTools/tools/get_coverage.h
 GEMTools/tools/gt.construct.c
+GEMTools/tools/gt.coverage.c
 GEMTools/tools/gt.filter.c
 GEMTools/tools/gt.gtfcount.c
 GEMTools/tools/gt.map2sam.c

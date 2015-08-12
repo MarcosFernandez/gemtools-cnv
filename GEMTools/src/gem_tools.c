@@ -13,30 +13,30 @@
  */
 gt_option gt_filter_options[] = {
   /* I/O */
-  { 'i', "input", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "" },
-  { 'o', "output", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "" },
-  { 'r', "reference", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file> (MultiFASTA/FASTA)" , "" },
-  { 'I', "gem-index", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file> (GEM2-Index)" , "" },
-  { 200, "annotation", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file> (GTF Annotation)" , "" },
-  { 201, "mmap-input", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , false, "" , "" },
-  { 'p', "paired-end", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "" },
-  { 202, "output-format", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "'FASTA'|'MAP'|'SAM' (default='InputFormat')" , "" },
-  { 203, "discarded-output", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "" , "" },
-  { 204, "no-output", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "" },
+  { 'i', "input", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "Input file. (default: stdin)" },
+  { 'o', "output", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "Output file. (default: stdout)" },
+  { 'r', "reference", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "MultiFASTA/FASTA genomic reference" },
+  { 'I', "gem-index", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "GEM Index" },
+  { 200, "annotation", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "GTF reference annotation" },
+  { 201, "mmap-input", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , false, "" , "Memory-map input file" },
+  { 'p', "paired-end", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "Paired-end input" },
+  { 202, "output-format", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<format>", "'FASTA'|'MAP'|'SAM' (default: 'InputFormat')" },
+  { 203, "discarded-output", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "Write discarded reads to this file" },
+  { 204, "no-output", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "Do not write output" },
   { 205, "check-duplicates", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "Check for duplicated mappings" },
   /* Filter Read/Qualities */
-  { 300, "hard-trim", GT_OPT_REQUIRED, GT_OPT_FLOAT, 3 , true, "<left>,<right>" , "" },
-  { 301, "quality-trim", GT_OPT_REQUIRED, GT_OPT_FLOAT, 3 , false, "<quality-threshold>,<min-read-length>" , "" },
-  { 302, "restore-trim", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "(Previously annotated in the read)" , "" },
+  { 300, "hard-trim", GT_OPT_REQUIRED, GT_OPT_FLOAT, 3 , true, "<left>,<right>" , "Hard trim the reads by <left> and <right> number of bases" },
+  { 301, "quality-trim", GT_OPT_REQUIRED, GT_OPT_FLOAT, 3 , false, "<quality-threshold>,<min-read-length>" , "Quality trim the reads" },
+  { 302, "restore-trim", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "Restore previously annotated in the read (i.e. trimmed reads)" },
   { 303, "uniform-read", GT_OPT_OPTIONAL, GT_OPT_STRING, 3 , true, "['strict']" , "" },
-  { 304, "qualities-to-offset-33", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "" },
-  { 305, "qualities-to-offset-64", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "" },
-  { 306, "remove-qualities", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "" },
-  { 307, "add-qualities", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "" },
+  { 304, "qualities-to-offset-33", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "Convert qualities to offset 64" },
+  { 305, "qualities-to-offset-64", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "Convert qualities to offset 33" },
+  { 306, "remove-qualities", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "Remove qualities" },
+  { 307, "add-qualities", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "Add qualitites" },
   /* Filter Template/Alignments */
-  { 400, "mapped", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 4 , true, "" , "" },
-  { 401, "unmapped", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 4 , true, "" , "" },
-  { 402, "unique-level", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "<number>|<float>" , "" },
+  { 400, "mapped", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 4 , true, "" , "Output only mapped reads" },
+  { 401, "unmapped", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 4 , true, "" , "Output only unmapped reads" },
+  { 402, "unique-level", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "<number>|<float>" , "Output only reads that map uniquely up to the given level" },
   { 403, "min-length", GT_OPT_REQUIRED, GT_OPT_INT, 4 , true, "<number>" , "" },
   { 404, "max-length", GT_OPT_REQUIRED, GT_OPT_INT, 4 , true, "<number>" , "" },
   { 405, "min-maps", GT_OPT_REQUIRED, GT_OPT_INT, 4 , true, "<number>" , "" },
@@ -101,7 +101,7 @@ gt_option gt_filter_options[] = {
   { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 11 , true, "" , "" },
   { 'H', "help-full", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 11 , false, "" , "" },
   { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 11 , false, "" , "" },
-  {  0, "", 0, 0, 0, false, "", ""}
+  {  0, 0, 0, 0, 0, false, "", ""}
 };
 char* gt_filter_options_short = "i:o:r:I:pd:D:Ckst:hHv";
 char* gt_filter_groups[] = {
@@ -151,7 +151,7 @@ gt_option gt_stats_options[] = {
   { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5, true, "", ""},
   { 'H', "help-full", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , false, "" , "" },
   { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , false, "" , "" },
-  {  0, "", 0, 0, 0, false, "", ""}
+  {  0, 0, 0, 0, 0, false, "", ""}
 };
 char* gt_stats_options_short = "i:r:I:pn:o:f:aMTQRPDvt:hH";
 char* gt_stats_groups[] = {
@@ -178,7 +178,7 @@ gt_option gt_mapset_options[] = {
       "        join\n"
       "        display-compact\n"
       "     [Map Specific]\n"
-      "        merge-map\n" , "" },
+      "        merge-map" , "" },
   /* I/O */
   { 300, "i1", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file>" , "" },
   { 301, "i2", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file>" , "" },
@@ -196,7 +196,7 @@ gt_option gt_mapset_options[] = {
 #endif
   { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5, true, "", ""},
   { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , false, "" , "" },
-  {  0, "", 0, 0, 0, false, "", ""}
+  {  0, 0, 0, 0, 0, false, "", ""}
 };
 char* gt_mapset_options_short = "C:po:svt:h";
 char* gt_mapset_groups[] = {
@@ -213,40 +213,149 @@ char* gt_mapset_groups[] = {
  */
 gt_option gt_scorereads_options[] = {
   /* Operations */
+  { 'R', "realign", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "" },
+  { 'b', "bisulfite", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "" },
+  
    /* I/O */
   { 300, "i1", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file>" , "" },
   { 301, "i2", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file>" , "" },
-  { 'i', "insert-dist", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file>" , "" },
+  { 303, "insert-dist", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file>" , "" },
   { 'p', "paired-end", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "" },
   { 'z', "gzip", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "" },
   { 'j', "bzip2", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "" },
   { 'Z', "no-compress", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , true, "" , "" },
   { 302, "mmap-input", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , false, "" , "" },
   { 'o', "output", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file>" , "" },
+  { 'r', "reference", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file> (MultiFASTA/FASTA)" , "" },
+  { 's', "header", GT_OPT_REQUIRED, GT_OPT_STRING, 3, true, "<file (SAM Header)" , "" },
+  { 'I', "gem-index", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file> (GEM2-Index)" , "" },
+
   /* Score Function */
-  { 'x', "insert-dist-cutoff", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
-  { 'q', "quality-format", GT_OPT_REQUIRED, GT_OPT_INT, 4 , true, "" , "" },
+  { 'q', "quality-format", GT_OPT_REQUIRED, GT_OPT_STRING, 4 , true, "'offset-33'|'offset-64'" , "" },
   { 401, "min-insert", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
   { 402, "max-insert", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
-  { 403, "indel-score", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
-  { 'm', "mapping-quality-cutoff", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
+  { 403, "indel-penalty", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
+  { 'm', "mismatch-limit", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
+  { 'M', "mapping-quality-cutoff", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
+  { 'S', "split-penalty", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
+  { 404, "max-pair-maps", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
+  { 405, "max-orphan-maps", GT_OPT_REQUIRED, GT_OPT_FLOAT, 4 , true, "" , "" },
+
+  /* Optional Fields */
+  { 500, "tags", GT_OPT_REQUIRED, GT_OPT_STRING, 5 , true, "<tags>" , "Enable/Disable additional fields with <field>:[0|1].\\n"
+                                                                      "The following fields are available:\\n"
+                                                                      "\\n"
+                                                                      "NH on\\n"
+                                                                      "NM on\\n"
+                                                                      "XT on\\n"
+                                                                      "MD on\\n"
+                                                                      "XS off\\n"
+                                                                      "SA on\\n"
+                                                                      "MQ on\\n"
+                                                                      "SQ on\\n"
+                                                                      "UQ on\\n"
+                                                                      "PQ on\\n"
+                                                                      "TP on\\n"
+                                                                      "AS on\\n"
+                                                                      "cs off\\n"
+                                                                      "md off\\n"
+                                                                      "xp on\\n"
+                                                                      "" },
+
+  /* Headers */
+  { 600, "read-group-id", GT_OPT_REQUIRED, GT_OPT_STRING, 6 , true, "<id>" , "Read group id" },
+
+  /* Format */
+  { 700, "always-print-seq", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 7 , true, "" , "" },
+  { 704, "output-format", GT_OPT_REQUIRED, GT_OPT_STRING, 7 , true, "'MAP'|'SAM'", "Output format. (default: 'MAP')" },
+  { 'c', "compact", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 7 , false, "" , "" },
+
   /* Misc */
-  { 'v', "verbose", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5, true, "", ""},
+  { 'v', "verbose", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 8, true, "", ""},
 #ifdef HAVE_OPENMP
-  { 't', "threads", GT_OPT_REQUIRED, GT_OPT_INT, 5, true, "", ""},
+  { 't', "threads", GT_OPT_REQUIRED, GT_OPT_INT, 8, true, "", ""},
 #endif
-  { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5, true, "", ""},
-  { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , false, "" , "" },
-  {  0, "", 0, 0, 0, false, "", ""}
+  { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 8, true, "", ""},
+  { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 8 , false, "" , "" },
+  {  0, 0, 0, 0, 0, false, "", ""}
 };
-char* gt_scorereads_options_short = "i:q:pzjZo:x:m:vt:hJ";
+char* gt_scorereads_options_short = "q:pzjcRbZo:s:S:I:r:M:m:vt:hJ";
 char* gt_scorereads_groups[] = {
   /*  0 */ "Null",
   /*  1 */ "Unclassified",
   /*  2 */ "Operations",
   /*  3 */ "I/O",
   /*  4 */ "Score Function",
-  /*  5 */ "Misc"
+  /*  5 */ "Optional Fields",
+  /*  6 */ "Headers",
+  /*  7 */ "Format",
+  /*  8 */ "Misc",
+};
+gt_sam_attribute_option gt_scorereads_attribute_option_list[] = {
+		GT_SAM_ATTRIBUTES_TAG(NH,true),
+		GT_SAM_ATTRIBUTES_TAG(NM,true),
+		GT_SAM_ATTRIBUTES_TAG(XT,true),
+		GT_SAM_ATTRIBUTES_TAG(MD,true),
+		GT_SAM_ATTRIBUTES_TAG(XS,false),
+		GT_SAM_ATTRIBUTES_TAG(SA,true),
+		GT_SAM_ATTRIBUTES_TAG(MQ,true),
+		GT_SAM_ATTRIBUTES_TAG(SQ,true),
+		GT_SAM_ATTRIBUTES_TAG(UQ,true),
+		GT_SAM_ATTRIBUTES_TAG(PQ,true),
+		GT_SAM_ATTRIBUTES_TAG(TP,true),
+		GT_SAM_ATTRIBUTES_TAG(TQ,true),
+		GT_SAM_ATTRIBUTES_TAG(AS,true),
+		GT_SAM_ATTRIBUTES_TAG(cs,false),
+		GT_SAM_ATTRIBUTES_TAG(md,false),
+		GT_SAM_ATTRIBUTES_TAG(xp,true),
+		GT_SAM_ATTRIBUTES_NULL_TAG // Should always finish list with this
+};
+
+/*
+ * gt.coverage menu options
+ */
+gt_option gt_coverage_options[] = {
+  /* Operations */
+  { 'c', "combine", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "" },
+  { 'd', "detailed_output", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2, true, "", "" },
+  { 'b', "block_size", GT_OPT_REQUIRED, GT_OPT_INT, 2, true, "", "" },
+  
+   /* I/O */
+  { 'o',"output", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<file>" , "" },
+  { 'p',"prefix", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<prefix>" , "" },
+
+  /* Range processing */
+  { 'r',"ranges_file", GT_OPT_REQUIRED, GT_OPT_STRING, 4 , true, "<file> (BED)" , "" },
+  { 't',"target_file", GT_OPT_REQUIRED, GT_OPT_STRING, 4 , true, "<file> (BED)" , "" },
+  { 'x', "extend_regions", GT_OPT_REQUIRED, GT_OPT_INT, 4 , true, "" , "" },
+
+  /* Filter Options */
+  { 'P',"paired", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , true, "" , "" },
+  { 'U',"unique", GT_OPT_REQUIRED, GT_OPT_STRING, 5 , true, "'first'|'GEM'|'XT'|'MQ:xx'" , "" },
+  { 'D',"duplicates", GT_OPT_REQUIRED, GT_OPT_STRING, 5 , true, "'ignore'|'remove'" , "" },
+  { 'q',"min-quality", GT_OPT_REQUIRED, GT_OPT_INT, 5 , true, "" , "" },
+
+  /* Misc */
+  { 'v', "verbose", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 8, true, "", ""},
+#ifdef HAVE_OPENMP
+  { 'T', "threads", GT_OPT_REQUIRED, GT_OPT_INT, 8, true, "", ""},
+#endif
+  { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 8, true, "", ""},
+  { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 8 , false, "" , "" },
+  {  0, 0, 0, 0, 0, false, "", ""}
+};
+
+char* gt_coverage_options_short = "cdb:o:p:r:t:x:PU:D:q:vT:hJ";
+char* gt_coverage_groups[] = {
+  /*  0 */ "Null",
+  /*  1 */ "Unclassified",
+  /*  2 */ "Operations",
+  /*  3 */ "I/O",
+  /*  4 */ "Range Processing",
+  /*  5 */ "Filter Options",
+  /*  6 */ "Headers",
+  /*  7 */ "Format",
+  /*  8 */ "Misc",
 };
 
 /*
@@ -254,26 +363,42 @@ char* gt_scorereads_groups[] = {
  */
 gt_option gt_map2sam_options[] = {
   /* I/O */
-  { 'i', "input", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "" },
+	  { 'i', "input", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "" },
   { 'o', "output", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file>" , "" },
   { 'r', "reference", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file> (MultiFASTA/FASTA)" , "" },
+  { 's', "header", GT_OPT_REQUIRED, GT_OPT_STRING, 2, true, "<file (SAM Header)" , "" },
   { 'I', "gem-index", GT_OPT_REQUIRED, GT_OPT_STRING, 2 , true, "<file> (GEM2-Index)" , "" },
   { 'p', "paired-end", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "" },
-  { 'Q', "calc-mapq", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 2 , true, "" , "" },
-  { 200, "mmap-input", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , false, "" , "" },
+   { 200, "mmap-input", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , false, "" , "" },
   /* Headers */
-  // { 300, "", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , false, "" , "" },
-  /* Alignments */
-  { 'q', "quality-format", GT_OPT_REQUIRED, GT_OPT_STRING, 4 , false, "'offset-33'|'offset-64'" , "" },
+   { 300, "read-group-id", GT_OPT_REQUIRED, GT_OPT_STRING, 3 , true, "<read group id>" , "" },
+     /* Alignments */
+   { 'q', "quality-format", GT_OPT_REQUIRED, GT_OPT_STRING, 4 , true, "'offset-33'|'offset-64'" , "" },
   /* Optional Fields */
-  { 500, "NH", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , true, "" , "" },
-  { 501, "NM", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , true, "" , "" },
-  { 502, "XT", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , true, "" , "" },
-  { 503, "XS", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , true, "" , "" },
-  { 504, "md", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , true, "" , "" },
+   { 500, "tags", GT_OPT_REQUIRED, GT_OPT_STRING, 5 , true, "<tags>" , "Enable/Disable additional fields with <field>:[0|1].\\n"
+                                                                      "The following fields are available:\\n"
+                                                                      "\\n"
+                                                                      "NH on\\n"
+                                                                      "NM on\\n"
+                                                                      "XT on\\n"
+                                                                      "MD on\\n"
+                                                                      "XS off\\n"
+                                                                      "SA on\\n"
+                                                                      "SQ on\\n"
+                                                                      "MQ on\\n"
+                                                                      "UQ on\\n"
+                                                                      "PQ on\\n"
+                                                                      "TP on\\n"
+                                                                      "AS on\\n"
+                                                                      "cs off\\n"
+                                                                      "md off\\n"
+                                                                      "xp on\\n"
+                                                                      "" },
+  { 'Q', "calc-mapq", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , true, "" , "" },
 //  { 500, "", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , true, "" , "" },
   /* Format */
   { 'c', "compact", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 6 , false, "" , "" },
+  { 600, "always-print-seq", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 6 , true, "" , "" },
   /* Misc */
   { 'v', "verbose", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 7, true, "", ""},
 #ifdef HAVE_OPENMP
@@ -281,10 +406,10 @@ gt_option gt_map2sam_options[] = {
 #endif
   { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 7, true, "", ""},
   { 'H', "help-full", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 7 , false, "" , "" },
-  { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , false, "" , "" },
-  {  0, "", 0, 0, 0, false, "", ""}
+  { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 7 , false, "" , "" },
+  {  0, 0, 0, 0, 0, false, "", ""}
 };
-char* gt_map2sam_options_short = "i:o:r:I:pq:ct:QhHv";
+char* gt_map2sam_options_short = "i:o:r:I:pq:ct:s:QhHv";
 char* gt_map2sam_groups[] = {
   /*  0 */ "Null",
   /*  1 */ "Unclassified",
@@ -295,6 +420,28 @@ char* gt_map2sam_groups[] = {
   /*  6 */ "Format",
   /*  7 */ "Misc",
 };
+
+/* For the moment gt_scorereads and gt_map2sam will have the same SAM TAG definitions (but this can be changed) */
+gt_sam_attribute_option gt_map2sam_attribute_option_list[] = {
+		GT_SAM_ATTRIBUTES_TAG(NH,true),
+		GT_SAM_ATTRIBUTES_TAG(NM,true),
+		GT_SAM_ATTRIBUTES_TAG(XT,true),
+		GT_SAM_ATTRIBUTES_TAG(MD,true),
+		GT_SAM_ATTRIBUTES_TAG(XS,false),
+		GT_SAM_ATTRIBUTES_TAG(SA,true),
+		GT_SAM_ATTRIBUTES_TAG(MQ,true),
+		GT_SAM_ATTRIBUTES_TAG(SQ,true),
+		GT_SAM_ATTRIBUTES_TAG(UQ,true),
+		GT_SAM_ATTRIBUTES_TAG(PQ,true),
+		GT_SAM_ATTRIBUTES_TAG(TP,true),
+		GT_SAM_ATTRIBUTES_TAG(TQ,true),
+		GT_SAM_ATTRIBUTES_TAG(AS,true),
+		GT_SAM_ATTRIBUTES_TAG(cs,false),
+		GT_SAM_ATTRIBUTES_TAG(md,false),
+		GT_SAM_ATTRIBUTES_TAG(xp,true),
+		GT_SAM_ATTRIBUTES_NULL_TAG // Should always finish list with this
+};
+
 /*
  * gt.gtfcount menu options
  */
@@ -321,7 +468,7 @@ gt_option gt_gtfcount_options[] = {
   { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 4, true, "", ""},
   { 'H', "help-full", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 4 , false, "" , "" },
   { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 4 , false, "" , "" },
-  {  0, "", 0, 0, 0, false, "", ""}
+  {  0, 0, 0, 0, 0, false, "", ""}
 };
 char* gt_gtfcount_options_short = "i:o:a:p:t:mwhHv";
 char* gt_gtfcount_groups[] = {
@@ -344,11 +491,12 @@ gt_option gt_region_options[] = {
 
   /* Misc */
   { 'g', "gene-id", GT_OPT_REQUIRED, GT_OPT_NONE, 5 , true, "" , "" },
+  { 'r', "ref-id", GT_OPT_REQUIRED, GT_OPT_NONE, 5 , true, "" , "" },
   { 't', "threads", GT_OPT_REQUIRED, GT_OPT_INT, 5, true, "", ""},
   { 'h', "help", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5, true, "", ""},
   { 'H', "help-full", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 5 , false, "" , "" },
   { 'J', "help-json", GT_OPT_NO_ARGUMENT, GT_OPT_NONE, 3 , false, "" , "" },
-  {  0, "", 0, 0, 0, false, "", ""}
+  {  0, 0, 0, 0, 0, false, "", ""}
 };
 char* gt_region_options_short = "i:o:a:p:t:hH";
 char* gt_region_groups[] = {
@@ -369,10 +517,10 @@ GT_INLINE uint64_t gt_options_get_num_options(const gt_option* const options) {
 }
 GT_INLINE struct option* gt_options_adaptor_getopt(const gt_option* const options) {
   const uint64_t num_options = gt_options_get_num_options(options);
-  struct option* menu_options = gt_malloc(sizeof(struct option)*num_options);
+  struct option* menu_options = gt_malloc(sizeof(struct option)*(1+num_options));
   // Adapt all the records
   uint64_t i = 0;
-  for (i=0;i<num_options;++i) {
+  for (i=0;i<=num_options;++i) {
     menu_options[i].name = options[i].long_option;
     menu_options[i].has_arg = options[i].option_type;
     menu_options[i].flag = 0;

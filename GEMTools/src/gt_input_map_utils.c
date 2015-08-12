@@ -54,7 +54,8 @@ GT_INLINE gt_status gt_merge_map_read_template_sync(
         gt_fatal_error_msg("Fatal error parsing file <<Slave>>");
       }
       // Synch loop
-      while (!gt_streq(gt_template_get_tag(template_master),gt_template_get_tag(template_slave))) {
+      while (!(gt_streq(gt_template_get_tag(template_master),gt_template_get_tag(template_slave)) &&
+               gt_template_get_pair(template_master)==gt_template_get_pair(template_slave))) {
         // Print non correlative master's template
         gt_output_map_bofprint_template(buffered_output,template_master,&output_attributes);
         // Fetch next master's template
@@ -102,7 +103,8 @@ GT_INLINE void gt_merge_synch_map_files_(
             buffered_input_file[0]->input_file->file_name,buffered_input_file[i]->input_file->file_name);
       }
       // Check tags
-      if (!gt_string_equals(template[0]->tag,template[i]->tag)) {
+      if (!(gt_streq(gt_template_get_tag(template[0]),gt_template_get_tag(template[i])) &&
+            gt_template_get_pair(template[0])==gt_template_get_pair(template[i]))) {
         gt_fatal_error_msg("Files are not synchronized ('%s','%s')\n"
             "\tDifferent TAGs found '"PRIgts"' '"PRIgts"' ",
             buffered_input_file[0]->input_file->file_name,buffered_input_file[i]->input_file->file_name,

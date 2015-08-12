@@ -152,7 +152,7 @@ executables = execs_dict({
     "bam2fastq": "bam2fastq",
     "FastqSplitter": "FastqSplitter",
     "kmermaker": "kmermaker",
-    "gt-scorereads": "gt.scorereads",
+    "gt.scorereads": "gt.scorereads",
     "mrcanavar": "mrcanavar",
     "copyNumberDistribution.R": "copyNumberDistribution.R",
     "makeHistogramCounts.R": "makeHistogramCounts.R",
@@ -549,7 +549,8 @@ def bwaMapper(input, reference, output=None,
            threads=1,
            compress=False,
            name="",
-           sort_memory="768M"
+           sort_memory="768M",
+           tmp=None
            ):
     """Start the BWA mapper on the given input.
     If input is a file handle, it is assumed to
@@ -564,6 +565,7 @@ def bwaMapper(input, reference, output=None,
     output -- output file name
     reference -- bwa reference
     name -- namfe of the file to be mapped
+    tmp -- temporary directory
     """
     ## prepare inputs
     reference = _prepare_bwa_reference_parameter(reference)
@@ -587,8 +589,8 @@ def bwaMapper(input, reference, output=None,
     
     #sam to bam 
     sam2bam_p = _check_samtools("view", threads=threads, extend=["-S", "-b", "-h"])
-   
     sam2bam_p.append('-')
+   
     tools.append(sam2bam_p)
     
     
@@ -598,10 +600,10 @@ def bwaMapper(input, reference, output=None,
                 '-T','deleteme.' + name,
                 '-O','bam',
     ]
-
-    tools.append(bamToSort) 
     
-    process = utils.run_tools(tools, input=None, output=output, name="BWA-MAP")
+    tools.append(bamToSort)       
+    
+    process = utils.run_tools(tools, input=None, output=None, name="BWA-MAP")
     if process.wait() != 0:
         raise ValueError("Error while running BWA MEM Mapping")
     
@@ -633,12 +635,13 @@ def runBamSummaryMetrics(input=None,output=None,picard_tools_path=None,java_heap
         raise ValueError("Error while running Bam Summary Metrics")
 		
 
-def mergeBams(input=None,output=None):
+def mergeBams(input=None,output=None,threads="1"):
     """ Merge Bam files 
     input -- List of bam files
     output -- Merged bam 
+    threads -- Number of threads to use to perform the merging
     """
-    
+ 
     #merge command
     merge = ['samtools','merge',output]
     for i in input:
@@ -880,17 +883,18 @@ def cnvMapper(input,index,output=None,
     process = utils.run_tools(tools, input=None, output=output, name="CNV-Mapper")
     return _prepare_output(process, output=output)
 
-def mapToSam(input,index,output=None,name=None,threads=8,sort_memory="768M"):
+def mapToSam(input,index,output=None,name=None,threads=8,sort_memory="768M",tmp=None):
     """Transforms MAP to SAM 
 
     input -- A ReadIterator with the input
     index -- valid GEM2 index
     output -- output file name
     name -- basic name ouput
-    threads -- threads default 8    
+    threads -- threads default 8
+    tmp -- tmp folder to store chunks reads while sorting    
     """ 
     ## prepare the input
-    pa = [executables['gt-scorereads'],
+    pa = [executables['gt.scorereads'],
            '--i1', input,
            '--gem-index', index,
            '-q','offset-33',
@@ -919,11 +923,11 @@ def mapToSam(input,index,output=None,name=None,threads=8,sort_memory="768M"):
     ]
 
     tools.append(bamToSort) 
-   
+
     ##compress mappings
     gzip = _compressor(threads=max(1, int(threads) / 2))
     tools.append(gzip) 
-   
+
     ## run the mapper
     process = utils.run_tools(tools, input=None, output=output, name="map-sam")
     return _prepare_output(process, output=output)

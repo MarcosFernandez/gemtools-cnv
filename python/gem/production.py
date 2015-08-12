@@ -416,6 +416,8 @@ class JunctionExtraction(Command):
 class BasicMappingPipeline(Command):
     description = """BWA MEM basic mapping
    
+    BETA VERSION   
+   
     Input file detection: If you do not specify --single to disable read pairing, we look automatically for
     the second pair file if you only specify one file. For that to work, the second file has to end with
     wither .2 or _2, with the file extension .fastq or .txt (+ .gz for compressed files). For example,
