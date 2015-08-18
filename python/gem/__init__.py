@@ -916,9 +916,10 @@ def mapToSam(input,index,output=None,name=None,threads=8,sort_memory="768M",tmp=
     tools.append(samToBam)
     
     #sort bam
+    tmp = os.path.basename(output)
     bamToSort = ['samtools', 'sort',
                 '-@',str(threads),
-                '-T','deleteme.' + name,
+                '-T','deleteme.' + tmp,
                 '-O','sam',
     ]
 
